@@ -1,0 +1,21 @@
+[package] 
+name = "spark" # Name of the program.
+description = "Bootloader made purely in rust. Supports only UEFI. Designed for those who wants stability in their bootloader." # Description of the program
+version = "0.1.0" # Version of the program
+edition = "2024" 
+
+[dependencies]
+log = "0.4.29"
+uefi = { version = "0.36.1", features = ["logger", "panic_handler"] }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[build]
+target = "x86_64-unknown-uefi"
+[toolchain]
+targets = ["x86_64-unknown-uefi"]
+
