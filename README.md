@@ -24,12 +24,12 @@ Clone the repository and compile:
 ```bash
 git clone https://github.com/Flamitsu/spark
 cd spark
-cargo build --release
+cargo build --release --target=x86_64-unknown-uefi
 ```
 
 If the command
 ```bash
-cargo build --release
+cargo build --release --target=x86_64-unknown-uefi
 ```
 gave you any error, you should execute this command:
 ```bash
