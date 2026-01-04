@@ -1,14 +1,32 @@
+#![no_std]
 #![no_main]
-#![no_std] // Not using the std library (Since not OS is loaded.)
+use log::info;
+use uefi::proto::console::text::{Input, Key, ScanCode};
+use uefi::{boot, Char16, Result, ResultExt};
+use uefi::prelude::*;
+#[entry]
+fn main() {
+    let mut input: &mut Input;
+    loop {
+        // Pause until a keyboard event occurs.
+        let mut events = [input.wait_for_key_event().unwrap()];
+        boot::wait_for_event(&mut events).discard_errdata();
 
-use core::time::Duration; // using the duration method from core crate
-use log::info; // Using the info function from the log crate 
-use uefi::prelude::*; // Using the prelude functions of the uefi crate
+        let u_key = Char16::try_from('u').unwrap();
+        match input.read_key()? {
+            // Example of handling a printable key: print a message when
+            // the 'u' key is pressed.
+            Some(Key::Printable(key)) if key == u_key => {
+                info!("the 'u' key was pressed");
+            }
 
-#[entry] // Entry point of the binary
-fn main() -> Status { // Main function MUST return a status code at the end.
-    uefi::helpers::init().unwrap(); // Initializing the UEFI services
-    info!("Hello world!"); // Printing in the console
-    boot::stall(Duration::from_hours(10)); // 10 hours of pure hello world glorious
-    Status::SUCCESS // If the process reached this point means it had success.
+            // Example of handling a special key: exit the loop when the
+            // escape key is pressed.
+            Some(Key::Special(ScanCode::ESCAPE)) => {
+                break;
+            }
+            _ => {}
+        }
+    }
+    Ok(());
 }
