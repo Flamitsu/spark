@@ -1,32 +1,22 @@
-#![no_std]
-#![no_main]
-use log::info;
-use uefi::proto::console::text::{Input, Key, ScanCode};
-use uefi::{boot, Char16, Result, ResultExt};
-use uefi::prelude::*;
-#[entry]
-fn main() {
-    let mut input: &mut Input;
-    loop {
-        // Pause until a keyboard event occurs.
-        let mut events = [input.wait_for_key_event().unwrap()];
-        boot::wait_for_event(&mut events).discard_errdata();
+#![no_std] // Not using the std library (Since not OS is loaded.)
+#![no_main] 
+mod input;
+use core::time::Duration; // using the duration method from core crate
+use uefi::prelude::*; // Using the prelude functions of the uefi crate
+use uefi::println;
 
-        let u_key = Char16::try_from('u').unwrap();
-        match input.read_key()? {
-            // Example of handling a printable key: print a message when
-            // the 'u' key is pressed.
-            Some(Key::Printable(key)) if key == u_key => {
-                info!("the 'u' key was pressed");
-            }
-
-            // Example of handling a special key: exit the loop when the
-            // escape key is pressed.
-            Some(Key::Special(ScanCode::ESCAPE)) => {
-                break;
-            }
-            _ => {}
-        }
+#[entry] // Entry point of the binary
+fn main() -> Status { // Main function MUST return a status code at the end.
+    uefi::helpers::init().unwrap(); // Initializing the UEFI services
+    println!("Hello world!"); // Printing in the console
+    input::read_keyboard_events();
+    let mut counting = 0; // Integer that will change during the runtime
+    while counting < 100{ // While counting is less than 100 do 
+        println!("{}",counting); // Print the counter
+        boot::stall(Duration::from_secs(1)); // Wait 1 second
+        counting += 1; // Increase the counter
     }
-    Ok(());
+
+    boot::stall(Duration::from_secs(10)); // 10 hours of pure hello world glorious
+    Status::SUCCESS // If the process reached this point means it had success.
 }
