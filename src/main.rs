@@ -1,22 +1,20 @@
-#![no_std] // Not using the std library (Since not OS is loaded.)
-#![no_main] 
-mod input;
-use core::time::Duration; // using the duration method from core crate
-use uefi::prelude::*; // Using the prelude functions of the uefi crate
-use uefi::println;
+#![no_std] // No standard library imported (Since no OS is running for now)
+#![no_main] // No main function execution, needed the #[entry] point
 
-#[entry] // Entry point of the binary
-fn main() -> Status { // Main function MUST return a status code at the end.
-    uefi::helpers::init().unwrap(); // Initializing the UEFI services
-    println!("Hello world!"); // Printing in the console
-    input::read_keyboard_events();
-    let mut counting = 0; // Integer that will change during the runtime
-    while counting < 100{ // While counting is less than 100 do 
-        println!("{}",counting); // Print the counter
-        boot::stall(Duration::from_secs(1)); // Wait 1 second
-        counting += 1; // Increase the counter
+mod input; // input module imported (Just handles user input)
+
+use uefi::prelude::*; // prelude methods imported
+use uefi::println; // Prinln macro of the uefi crate
+
+#[entry] // Entry point of the program
+fn main() -> Status {
+    uefi::helpers::init().unwrap(); // Starting UEFI services
+
+    println!("UEFI started"); // Print into the console
+    println!("Press 'any' key or ESC to close the program"); // Showing that it manages input correctly
+
+    if let Err(e) = input::read_keyboard_events() { // Invokes the function
+        println!("Keyboard error: {:?}", e); // If the input handling had an error, shows which one
     }
-
-    boot::stall(Duration::from_secs(10)); // 10 hours of pure hello world glorious
-    Status::SUCCESS // If the process reached this point means it had success.
+    return Status::SUCCESS; // If the program reaches here, it returns success status and ends the program
 }
