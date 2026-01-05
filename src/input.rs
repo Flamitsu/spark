@@ -6,7 +6,7 @@ use uefi::println; // Import the println macro from the uefi crate
 // The function exists whenever the key ESC is pressed (I will change this in the future)
 pub fn read_keyboard_events() -> Result {
     // system::with_stdin obtiene un &mut Input de forma segura
-    system::with_stdin(|input: &mut Input| -> Result {
+    system::with_stdin(|input: &mut Input| -> Result{
         loop {
             // wait_for_key_event() devuelve Option<Event>
             let ev = match input.wait_for_key_event() {
@@ -36,7 +36,6 @@ pub fn read_keyboard_events() -> Result {
                 }
             }
         }
-
         Ok(()) // Return status code
     })
 }

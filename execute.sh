@@ -17,7 +17,7 @@ if [ ! -d "$EXECUTION_DIR" ]; then
     mkdir -p "$EXECUTION_DIR/esp/efi/boot"
 fi
 # Copy the final binary from the target directory
-cp target/x86_64-unknown-uefi/debug/spark.efi "$EXECUTION_DIR/esp/efi/boot/bootx64.efi"
+cp target/x86_64-unknown-uefi/debug/spark.efi "$EXECUTION_DIR/esp/efi/boot/sparkx64.efi"
 
 # Entry the execution directory
 cd "$EXECUTION_DIR" || exit 1
