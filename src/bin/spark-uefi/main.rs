@@ -1,3 +1,5 @@
+// This is the bootmanager code file. Code execution flow is right here.
+
 #![no_std] // No standard library imported (Since no OS is running for now)
 #![no_main] // No main function execution, needed the #[entry] point
 
@@ -14,6 +16,7 @@ fn main() -> Status {
     uefi::helpers::init().unwrap(); // Starting UEFI services
     find_boot::find_boot_entry(); // Find boots entries
     configuration::spark_config(); // Parse configuration from the config file 
+    configuration::boot_entries();
     kernel::load_kernel();
     println!("---- Spark bootmanager ----"); // Print into the console
 

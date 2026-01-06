@@ -1,16 +1,30 @@
-[package] 
-name = "spark" # Name of the program.
+[package]
+name = "spark" # Name of the project
+version = "0.1.0" # Version of the project
+edition = "2024"
 description = "Bootloader made purely in rust. Supports only UEFI. Designed for those who wants stability in their bootloader." # Description of the program
-version = "0.1.0" # Version of the program
-edition = "2024" 
 
-[dependencies]
-log = "0.4.29"
-uefi = { version = "0.36.1", features = ["logger", "panic_handler"] }
+[dependencies.uefi] # UEFI feature
+package = "uefi"
+version = "0.36.1"
+optional = true
+features = ["default","alloc","global_allocator","panic_handler"]
+
+[[bin]] # The bin of the bootmanager code path
+name = "sparkx64"
+path = "src/bin/spark-uefi/main.rs"
+
+[[bin]] # The bin of the general binary path
+name = "spark"
+path = "src/bin/spark/main.rs"
+
+
+[features]
+sparkx64 = ["uefi"] # The only using the uefi crate is the sparkx64 binary
+spark = []
 
 [profile.dev]
 panic = "abort"
 
 [profile.release]
 panic = "abort"
-

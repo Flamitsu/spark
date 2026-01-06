@@ -1,5 +1,5 @@
 # Spark
-
+# Alpha stage
 Spark is a minimalist bootmanager written in Rust. Its goal is to be lightweight, secure, and stable bootmanager. 
 
 ## Features
@@ -14,8 +14,8 @@ Spark is a minimalist bootmanager written in Rust. Its goal is to be lightweight
 - UEFI (Not planning in the future supporting BIOS, this can change tho.)
 - Rust installed
 - x86_64 architecture
-- QEMU installed and configured
-- OVFM tools
+- QEMU installed and configured with an instance of a Linux OS
+- QEMU virtual snapshot of the virtual machine before executing the program
 
 ## Installation
 
@@ -24,12 +24,13 @@ Clone the repository and compile:
 ```bash
 git clone https://github.com/Flamitsu/spark
 cd spark
-cargo build --release --target=x86_64-unknown-uefi
+cargo build-uefi # For the uefi binary
+cargo build-normal # For the general binary
 ```
 
 If the command
 ```bash
-cargo build --release --target=x86_64-unknown-uefi
+cargo build-uefi
 ```
 gave you any error, you should execute this command:
 ```bash
@@ -38,8 +39,9 @@ rustup target add x86_64-unknown-uefi
 Then re-run the cargo build command.
 
 ## Execution
-```bash
-./execute.sh
-```
-That should execute the final compiled binary with QEMU.
-You should execute the command "./execute" if you have rebuilt the package. It does the work for you and replace the old binary in the directory. 
+
+For the execution of the program, I strongly recommend trying it inside a virtual machine.
+I have the execute.sh script for this porpouse. IT IS NOT MEANT TO BE EXECUTED INSIDE THE HOST MACHINE.
+Inside a virtual machine, for example with Debian installed, or another distro, you can try the program.
+Clone the repository, execute the script, and it will automatically reboot. Then choose the entry that is named Spark.
+If something goes wrong, I recommend to rollback to the previous snapshot, open an issue and describing the problem. Take in mind this is still work in progress and will be.
