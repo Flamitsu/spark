@@ -1,33 +1,23 @@
-// File where is going to reside the code of the general binary
-use std::env;
-use std::process::exit;
-
+// This is the main code flow for the general spark binary.
+use std::env; // Provides the functionality for the arguments 
+use std::process::exit; // Provides the correct function to exit the script
+mod auto_detect; // Module for auto_detect the path of the kernels already installed 
+mod remove; // For removing the Spark installation in the system
+mod install; // For installing the Spark program in the system
+mod utils; // De-duplicated code library
 fn main() {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() < 2 {
-        run_default();
+    let argument: Vec<String> = env::args().collect();
+    if argument.len() < 1 {
+        auto_detect::detect_new_kernel();
         return;
     }
     // Arguments
-    match args[1].as_str() {
-        "install" => install(),
-        "remove"  => remove(),
+    match argument[1].as_str() {
+        "install" => install::install(),
+        "remove"  => remove::remove_installation(),
         _ => {
-            eprintln!("Unknown argument: {}", args[1]);
+            eprintln!("Unknown argument: {}", argument[1]);
             exit(1);
         }
     }
-}
-// Default argument (non argument)
-fn run_default() {
-    println!("Detect kernels...");
-}
-// Install argument
-fn install() {
-    println!("Installing the EFI binary...");
-}
-// Remove argument
-fn remove() {
-    println!("Remove");
 }

@@ -12,7 +12,7 @@ use uefi::println; // Prinln macro of the uefi crate
 
 #[entry] // Entry point of the program
 fn main() -> Status {
-    
+
     uefi::helpers::init().unwrap(); // Starting UEFI services
     find_boot::find_boot_entry(); // Find boots entries
     configuration::spark_config(); // Parse configuration from the config file 

@@ -1,8 +1,8 @@
 // This file is for parsing the conf file 
 use uefi::println;
-use uefi::prelude::*;
-use uefi::CString16;
-use uefi::fs::FileSystem;
+// use uefi::prelude::*;
+// use uefi::CString16;
+// use uefi::fs::FileSystem;
 const SPARK_FILE_ROUTE:&str = r"\spark.conf"; // Using the raw parameter for the string and declaring the route for the conf file
 
 pub fn spark_config(){
