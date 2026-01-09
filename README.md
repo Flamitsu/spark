@@ -16,7 +16,7 @@ Spark is a minimalist bootmanager written in Rust. Its goal is to be lightweight
 - x86_64 architecture
 - QEMU installed and configured with an instance of a Linux OS
 - QEMU virtual snapshot of the virtual machine before executing the program
-
+- FAT32 file system mounted in either '/boot,/boot/efi,/efi'. If not, the program will not know where to put the installation files and the install function will not work. 
 ## Installation
 
 Clone the repository and compile:
