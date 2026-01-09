@@ -36,6 +36,7 @@ pub fn detect_vfat() -> Option<String>{
             };
         };
     };
+    println!("Haven't found any FAT32 file system, mounted in /boot, /efi or /boot/efi");
     return None; // If it does not detect any vfat partition that is mounted on either those mount_points, then it is going to return None. 
 }
 
