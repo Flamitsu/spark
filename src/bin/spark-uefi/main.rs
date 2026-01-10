@@ -10,6 +10,11 @@ mod kernel; // Used to load the entry selected
 use uefi::prelude::*; // prelude methods imported
 use uefi::println; // Prinln macro of the uefi crate
 
+/*
+* Meant to be the core of the project, work in progress. Need first to configure and install the
+* general binary and then continue with the UEFI work
+*/
+
 #[entry] // Entry point of the program
 fn main() -> Status {
 

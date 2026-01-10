@@ -18,6 +18,7 @@ pub fn confirmation(context: &str) -> bool{ // This function needs an string and
 }
 
 // Function to skip confirmation 
+// Arguments to skip confirmation on execution are: "-y and --yes"
 pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool 
     let short_flag = "-y"; // Flag that can be used to skip confirmation 
     let long_flag = "--yes"; // Flag that can be used to skip confirmation 
@@ -29,10 +30,12 @@ pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool
     return false // If the argument does not match, return false, so it does not skip. 
 }
 
-// This function detect vfat partitions and the following mounted partitions:
-// /boot 
-// /boot/efi
-// /efi
+/* 
+* This function detect vfat partitions and the following mounted partitions:
+* /boot 
+* /boot/efi
+* /efi 
+*/
 pub fn detect_vfat() -> Option<String>{ 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
@@ -54,10 +57,18 @@ pub fn detect_vfat() -> Option<String>{
     return None; // If it does not detect any vfat partition that is mounted on either those mount_points, then it is going to return None. 
 }
 pub fn show_help(){
-    print!("Spark valid arguments: \n 
+    print!("Spark valid arguments:\n 
         install -- Installs spark binary into the boot partition.\n 
         remove -- Remove the spark binary installation from the boot partition.\n 
         help -- Shows this dialog.\n 
         clean -- Clean old system entries.\n 
-        update -- Detects and adds new kernel entries.");
+        update -- Detects and adds new kernel entries.\n\n");
+    print!("Spark parameters:\n 
+        --yes or -y : Skip confirmation");
+}
+pub fn dir_operations(create: bool){
+    // ,_arr: &[&str]){ This is for the moment undefined
+    if create{
+        print!("XD")
+    }
 }

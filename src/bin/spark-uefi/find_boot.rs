@@ -2,5 +2,9 @@
 // Platforms supported for now: None.
 use uefi::println;
 pub fn find_boot_entry() {
-    println!("Finding the boot entries...");
+    /*
+    * Should deliver all the boot entries found to the bootmanager main execution code. Incomplete 
+    * at this moment. 
+    */
+    println!("Finding the boot entries..."); // Placeholder
 }
