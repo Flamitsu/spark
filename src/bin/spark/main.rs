@@ -7,16 +7,21 @@ mod install; // For installing the Spark program in the system
 mod utils;
 fn main() {
     let argument: Vec<String> = env::args().collect(); // Detect user input
-    if argument.len() < 2 {
-        auto_detect::detect_new_kernel(); // If the user executes only "spark", it detect new kernels
+    if argument.len() < 2 { // dry-run
+        utils::show_help(); // Shows help so the user know what to execute
         return;
     }
     // Arguments
+    let skip_conf = utils::skip_confirmation(&argument); 
     match argument[1].as_str() { // Converts the argument into string 
-        "install" => install::install(), // Install argument invokes install function
-        "remove"  => remove::remove_installation(), // Remove argument invokes remove function
+        "install" => install::install(skip_conf), // Install argument invokes install function
+        "remove" => remove::remove_installation(skip_conf),// Remove argument invokes remove function
+        "help" => utils::show_help(), // Shows the help about the program
+        "clean" => print!("This function is still work in progress."),
+        "update" => print!("This function is still work in progress."),
         _ => { // If the user says something not contemplated before:
             eprintln!("Unknown argument: {}", argument[1]); // Unknown argument with the argument
+            utils::show_help(); // Show help argument
             exit(1); // Exit the process 
         }
     }

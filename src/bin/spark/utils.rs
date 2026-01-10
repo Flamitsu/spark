@@ -1,9 +1,9 @@
 use std::io::{stdin, Write, stdout}; // Import the input output standard library 
 use std::fs;
+
 // This is the archive where is going to be stored common code between the modules
 pub fn confirmation(context: &str) -> bool{ // This function needs an string and returns a bool
-    println!("Type 'YES' to {} spark, or 'NO' to cancel: ", context); // Prints the user what they 
-    // need to input
+    println!("Type 'YES' to {} spark, or 'NO' to cancel: ", context); // Prints the user what they need to input
     stdout().flush().unwrap();
     let mut decision = String::new(); // Creates a new string 
     stdin().read_line(&mut decision).unwrap(); // Read the input 
@@ -11,13 +11,28 @@ pub fn confirmation(context: &str) -> bool{ // This function needs an string and
         "YES" => return true, // If the user said yes all caps, it returns true 
         "NO" => return false, // If the user said no all caps, it returns false
         _ => {
-            println!("The program did not understood the input. Assuming 'NO'."); // If the user
-            // said something that is not 'NO' or 'YES' it returns false
+            println!("The program did not understood the input. Assuming 'NO'."); // If the user said something that is not 'NO' or 'YES' it returns false
             return false
         }
     }
 }
 
+// Function to skip confirmation 
+pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool 
+    let short_flag = "-y"; // Flag that can be used to skip confirmation 
+    let long_flag = "--yes"; // Flag that can be used to skip confirmation 
+    for arg in args{ // Iterate arg 
+        if arg == short_flag || arg == long_flag{ // If the argument matchs, return true
+            return true; 
+        }
+    }
+    return false // If the argument does not match, return false, so it does not skip. 
+}
+
+// This function detect vfat partitions and the following mounted partitions:
+// /boot 
+// /boot/efi
+// /efi
 pub fn detect_vfat() -> Option<String>{ 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
@@ -38,4 +53,11 @@ pub fn detect_vfat() -> Option<String>{
     };
     return None; // If it does not detect any vfat partition that is mounted on either those mount_points, then it is going to return None. 
 }
-
+pub fn show_help(){
+    print!("Spark valid arguments: \n 
+        install -- Installs spark binary into the boot partition.\n 
+        remove -- Remove the spark binary installation from the boot partition.\n 
+        help -- Shows this dialog.\n 
+        clean -- Clean old system entries.\n 
+        update -- Detects and adds new kernel entries.");
+}
