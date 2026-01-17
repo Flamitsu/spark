@@ -8,7 +8,7 @@ description = "Bootloader made purely in rust. Supports only UEFI. Designed for 
 package = "uefi"
 version = "0.36.1"
 optional = true
-features = ["default","alloc","global_allocator","panic_handler"]
+features = ["default", "alloc", "global_allocator", "panic_handler"]
 
 [[bin]] # The bin of the bootmanager code path
 name = "sparkx64"

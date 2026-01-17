@@ -1,5 +1,5 @@
 use std::io::{stdin, Write, stdout}; // Import the input output standard library 
-use std::fs;
+use std::{fs};
 
 // This is the archive where is going to be stored common code between the modules
 pub fn confirmation(context: &str) -> bool{ // This function needs an string and returns a bool
@@ -36,7 +36,7 @@ pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool
 * /boot/efi
 * /efi 
 */
-pub fn detect_vfat() -> Option<String>{ 
+pub fn detect_vfat() -> Option<String>{ // It returns the string 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
 
@@ -56,19 +56,36 @@ pub fn detect_vfat() -> Option<String>{
     };
     return None; // If it does not detect any vfat partition that is mounted on either those mount_points, then it is going to return None. 
 }
-pub fn show_help(){
-    print!("Spark valid arguments:\n 
-        install -- Installs spark binary into the boot partition.\n 
-        remove -- Remove the spark binary installation from the boot partition.\n 
-        help -- Shows this dialog.\n 
-        clean -- Clean old system entries.\n 
-        update -- Detects and adds new kernel entries.\n\n");
-    print!("Spark parameters:\n 
-        --yes or -y : Skip confirmation");
+pub fn show_help() {
+    print!(
+    "Spark - Bootmanager 
+    Usage: spark [COMMAND] [OPTIONS] 
+    
+    Commands: 
+        install     Installs spark binary into the boot partition.
+        remove      Remove the spark installation from the boot partition 
+        update      Detects and adds new kernel entries.
+        clean       Clean old system entries.
+        help        Shows this dialog. 
+
+    Options: 
+        -y, --yes   Skip confirmation prompts. 
+        --efi-bin   [PATH] Specify the route of the EFI binary (use with 'install')\n"
+);
 }
-pub fn dir_operations(create: bool){
-    // ,_arr: &[&str]){ This is for the moment undefined
-    if create{
-        print!("XD")
+
+pub fn it_exists(_route: Option<String>) -> bool{
+    return true
+}
+
+pub fn dir_operations(operations: bool,_route: Option<String>){
+    if operations{
+        let yes = it_exists(_route);
+        if yes{
+            println!("Installing the spark binary in the boot partition...")
+        }
+        
+    }else{
+        println!("Cancelling operation")
     }
 }
