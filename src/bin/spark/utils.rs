@@ -1,5 +1,6 @@
 use std::io::{stdin, Write, stdout}; // Import the input output standard library 
-use std::{fs};
+use std::fs::{self, create_dir};
+use std::path::Path;
 
 pub enum Directories{
     Create,
@@ -22,8 +23,10 @@ pub fn confirmation(context: &str) -> bool{ // This function needs an string and
     }
 }
 
-// Function to skip confirmation 
-// Arguments to skip confirmation on execution are: "-y and --yes"
+/* 
+* Function to skip confirmation 
+* Arguments to skip confirmation on execution are: "-y and --yes"
+*/
 pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool 
     let short_flag = "-y"; // Flag that can be used to skip confirmation 
     let long_flag = "--yes"; // Flag that can be used to skip confirmation 
@@ -41,7 +44,7 @@ pub fn skip_confirmation(args: &[String]) -> bool{ // Function returns a bool
 * /boot/efi
 * /efi 
 */
-pub fn detect_vfat() -> Option<String>{ // It returns the string 
+fn detect_vfat() -> Option<String>{ // It returns the string 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
 
@@ -62,10 +65,52 @@ pub fn detect_vfat() -> Option<String>{ // It returns the string
 }
 
 // This function gets the argument of installation and checks if it matches the argument flags
-pub fn get_efi_bin_path(_args: &[String]) -> Option<String>{
-    let _long_flag = "--efi-bin=";
-    let mut _command = String::new();
-    return None;
+pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
+    let long_flag = "--efi-bin="; // Define the long_flag
+    for arg in args{ // Iterate the argument 
+        if arg.starts_with(long_flag){ // Checks if the argument starts with long_flag 
+            let route = &arg[long_flag.len()..]; // Slices the argument and catchs the route
+            if route.ends_with(".efi"){ // check if the archive ends in .efi
+                if it_exists(Some(route.to_string())){ // Checks if the route exists
+                    return Some(route.to_string()); // Returns the actual value
+                }
+            }
+        }
+    }
+    return None; // If the efi bin path is not correct it returns none
+}
+
+// Shows if an archive exists or not.
+pub fn it_exists(route: Option<String>) -> bool{
+    match route{
+        Some(path) => {
+            Path::new(&path).exists() // If the archive exists, it returns true.
+        },
+        None => false // If the archive does not exists, it returns false 
+    }
+}
+
+// Dir operations such as deleting or creating directories
+pub fn dir_operations(operations: Directories,_route: Option<String>){
+    let esp = detect_vfat(); // The installation/uninstall route  
+    if esp == None{ // If it didn't found any compatible route then:
+        println!("Haven't found any FAT32 file system, mounted in /boot, /efi or /boot/efi");
+        return ; // Ends the installation process
+    }
+    let dir_array: [&str;5] = [
+        "/EFI", "/EFI/BOOT", "/EFI/spark", "/loader", "/loader/entries"];
+    match operations{
+        Directories::Create => { // This option will create the structure in the ESP route 
+            for dir in 1..dir_array.len() {
+                if it_exists(Some(dir_array[dir].to_string())){
+                    print!("XD");
+                }
+            }  
+        },
+        Directories::Delete => { // This option will delete the structure in the ESP route
+            println!("Delete operation.") // Placeholder
+        }
+    }
 }
 
 // Help message that will show up when spark is used wrong
@@ -83,22 +128,4 @@ pub fn show_help() {
         -y, --yes   Skip confirmation prompts. 
         --efi-bin   [PATH] Specify the route of the EFI binary (use with 'install')\n"
     );
-}
-
-// Shows if an archive exists or not.
-pub fn _it_exists(_route: Option<String>) -> bool{
-    return true
-}
-// Dir operations such as deleting or creating directories
-pub fn dir_operations(operations: Directories,_route: Option<String>){
-    match operations{
-        Directories::Create => { // 
-            // Placeholder
-            println!("Create operation.")
-        },
-        Directories::Delete => { // The delete operation of the directories enum struct
-            //Placeholder
-            println!("Delete operation.")
-        }
-    }
 }
