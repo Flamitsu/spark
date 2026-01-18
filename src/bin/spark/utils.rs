@@ -1,6 +1,11 @@
 use std::io::{stdin, Write, stdout}; // Import the input output standard library 
 use std::{fs};
 
+pub enum Directories{
+    Create,
+    Delete
+}
+
 // This is the archive where is going to be stored common code between the modules
 pub fn confirmation(context: &str) -> bool{ // This function needs an string and returns a bool
     println!("Type 'YES' to {} spark, or 'NO' to cancel: ", context); // Prints the user what they need to input
@@ -41,8 +46,7 @@ pub fn detect_vfat() -> Option<String>{ // It returns the string
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
 
     for line in mounts.lines() { // Iterate all the lines of the mounts aviables
-        let parts: Vec<&str> = line.split_whitespace().collect(); // declare a vector, every object
-        // is separated by a tab or a whitespace, and collect converts it into a vector
+        let parts: Vec<&str> = line.split_whitespace().collect(); // declare a vector, every object is separated by a tab or a whitespace, and collect converts it into a vector
         if parts.len() >= 3 { // If the vector have more length than 3, then 
             let mount_point = parts[1]; // The second slice is the mount point string 
             let file_system = parts[2]; // The third slice is the file system type
@@ -56,10 +60,17 @@ pub fn detect_vfat() -> Option<String>{ // It returns the string
     };
     return None; // If it does not detect any vfat partition that is mounted on either those mount_points, then it is going to return None. 
 }
+
+// This function gets the argument of installation and checks if it matches the argument flags
+pub fn get_efi_bin_path(_args: &[String]) -> Option<String>{
+    let _long_flag = "--efi-bin=";
+    let mut _command = String::new();
+    return None;
+}
+
+// Help message that will show up when spark is used wrong
 pub fn show_help() {
-    print!(
-    "Spark - Bootmanager 
-    Usage: spark [COMMAND] [OPTIONS] 
+    print!("Usage: spark [COMMAND] [OPTIONS] 
     
     Commands: 
         install     Installs spark binary into the boot partition.
@@ -71,21 +82,23 @@ pub fn show_help() {
     Options: 
         -y, --yes   Skip confirmation prompts. 
         --efi-bin   [PATH] Specify the route of the EFI binary (use with 'install')\n"
-);
+    );
 }
 
-pub fn it_exists(_route: Option<String>) -> bool{
+// Shows if an archive exists or not.
+pub fn _it_exists(_route: Option<String>) -> bool{
     return true
 }
-
-pub fn dir_operations(operations: bool,_route: Option<String>){
-    if operations{
-        let yes = it_exists(_route);
-        if yes{
-            println!("Installing the spark binary in the boot partition...")
+// Dir operations such as deleting or creating directories
+pub fn dir_operations(operations: Directories,_route: Option<String>){
+    match operations{
+        Directories::Create => { // 
+            // Placeholder
+            println!("Create operation.")
+        },
+        Directories::Delete => { // The delete operation of the directories enum struct
+            //Placeholder
+            println!("Delete operation.")
         }
-        
-    }else{
-        println!("Cancelling operation")
     }
 }

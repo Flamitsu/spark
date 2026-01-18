@@ -12,9 +12,10 @@ fn main() {
         return;
     }
     // Arguments
-    let skip_conf = utils::skip_confirmation(&argument); 
+    let skip_conf = utils::skip_confirmation(&argument); // Parses the argument  
+    let efi_bin = utils::get_efi_bin_path(&argument); // Parses the argument 
     match argument[1].as_str() { // Converts the argument into string 
-        "install" => install::install(skip_conf), // Install argument invokes install function
+        "install" => install::install(skip_conf, efi_bin), //Install argument invokes install func
         "remove" => remove::remove_installation(skip_conf),// Remove argument invokes remove function
         "help" => utils::show_help(), // Shows the help about the program
         "clean" => print!("This function is still work in progress."),
