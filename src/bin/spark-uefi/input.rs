@@ -36,6 +36,6 @@ pub fn read_keyboard_events() -> Result {
                 }
             }
         }
-        Ok(()) // Return status code
+        return Ok(()) // Return status code
     })
 }

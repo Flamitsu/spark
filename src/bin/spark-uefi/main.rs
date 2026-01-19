@@ -1,8 +1,5 @@
-// This is the bootmanager code file. Code execution flow is right here.
-
 #![no_std] // No standard library imported (Since no OS is running for now)
 #![no_main] // No main function execution, needed the #[entry] point
-
 mod input; // Input module imported (Just handles user input)
 mod configuration; // Configuration module imported (Parse the config file)
 mod find_boot; // Find the boot entries
@@ -15,18 +12,24 @@ use uefi::println; // Prinln macro of the uefi crate
 * general binary and then continue with the UEFI work
 */
 
-#[entry] // Entry point of the program
+// The entry point of the binary is needed so rust knows where the program starts. 
+#[entry]
 fn main() -> Status {
-
-    uefi::helpers::init().unwrap(); // Starting UEFI services
-    find_boot::find_boot_entry(); // Find boots entries
-    configuration::spark_config(); // Parse configuration from the config file 
+    // Start the UEFI services for the init system 
+    uefi::helpers::init().unwrap();
+    // Find the boot entries in the ESP partition
+    find_boot::find_boot_entry();
+    // Parse the config file to get the global configuration working 
+    configuration::spark_config(); 
+    // Function that should show the boot entries of the ESP partition
     configuration::boot_entries();
+    // Function to load the kernel from the ESP partition
     kernel::load_kernel();
-    println!("---- Spark bootmanager ----"); // Print into the console
-
+    println!("---- Spark bootmanager ----");
+    
+    // If the input had an error reading the keyboard event, then it will print which error.
     if let Err(e) = input::read_keyboard_events() { // Invokes the function
-        println!("Keyboard error: {:?}", e); // If the input handling had an error, shows which one
+        println!("Keyboard error: {:?}", e);
     }
-    return Status::SUCCESS; // If the program reaches here, it returns success status and ends the program
+    return Status::SUCCESS;
 }
