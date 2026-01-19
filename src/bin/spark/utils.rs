@@ -1,5 +1,5 @@
 use std::io::{stdin, Write, stdout}; // Import the input output standard library 
-use std::fs::{self, create_dir_all, remove_dir_all};
+use std::fs::{self, create_dir_all, remove_dir_all, copy};
 use std::path::Path;
 /// The enum structure 'Directories' is made to make directories operations such as create or delete directories 
 pub enum Directories{ 
@@ -110,13 +110,13 @@ pub fn it_exists(route: Option<&str>) -> bool{
 }
 
 /// Dir operations such as deleting or creating directories
-pub fn dir_operations(operations: Directories,_route: Option<String>){
+pub fn dir_operations(operations: Directories,route: Option<String>){
     // Those are the directories that spark needs to work properly. 
     let dir_array: [&str;3] = ["/EFI/BOOT", "/EFI/spark", "/loader/entries"]; 
     /*
      * This is important, parse the mount routes and detects which route of the system is assigned
      * for the ESP to be installed
-    */
+    */ 
     let esp = detect_vfat();
     // This code is needed to convert the Option<String> value to a String type value. 
     let esp = match esp{ 
@@ -133,6 +133,24 @@ pub fn dir_operations(operations: Directories,_route: Option<String>){
             Directories::Create => {
                 if let Err(error) = create_dir_all(&full_route){
                     eprintln!("Error creating {}: {}",full_route,error);
+                };
+                if dir == "/EFI/BOOT" || dir == "/EFI/spark"{
+                    // 
+                    if let Some(source_efi) = route.as_ref(){
+                        /*
+                         * The final file name depends on if the directory of destination is
+                         * /efi/boot or /efi/spark . 
+                         */
+                        let file_name = if dir == "/EFI/BOOT"
+                        {"BOOTX64.efi"} else 
+                        {"sparkx64.efi"};
+                        let destination = format!("{}/{}",full_route,file_name);
+                        if let Err(error) = copy(&source_efi, &destination){
+                            eprintln!("Error when trying to copy the binary {} to {}: {}",source_efi,destination,error);
+                        } else{
+                            println!("EFI binary copied correctly to: {}",destination)
+                        }
+                    }
                 }
             },
             // To delete directories, first is needed to know if the directory actually exists or not

@@ -45,3 +45,11 @@ I have the execute.sh script for this porpouse. IT IS NOT MEANT TO BE EXECUTED I
 Inside a virtual machine, for example with Debian installed, or another distro, you can try the program.
 Clone the repository, execute the script, and it will automatically reboot. Then choose the entry that is named Spark.
 If something goes wrong, I recommend to rollback to the previous snapshot, open an issue and describing the problem. Take in mind this is still work in progress and will be.
+
+When the project is already compiled and ready for execution, execute the next line of code:
+INSTALLATION COMMAND:
+```bash
+cd target/x86_64-unknown-linux-gnu/debug/
+./spark install --efi-bin=../../x86_64-unknown-uefi/debug/sparkx64.efi
+```
+And that will install the EFI binary inside your ESP partition.
