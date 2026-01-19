@@ -75,19 +75,22 @@ fn detect_vfat() -> Option<String>{ // It returns the string with the final inst
 /// This function gets an specific flag in the binary execution, and gets sliced to get the .efi binary   
 pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
     // Define the valid flag in the execution of the binary 
-    let flag = "--efi-bin="; // Define the long_flag
-    for arg in args{ // Iterate the argument 
-        if arg.starts_with(flag){ // Checks if the argument starts with long_flag 
-            let route = String::from(&arg[flag.len()..]); // Slices the argument and catchs the route
-            if route.ends_with(".efi"){ // check if the archive ends in .efi
-                if it_exists(Some(&route)){ // Checks if the route exists
-                    return Some(route); // Returns the actual value 
+    let flag = "--efi-bin="; 
+    // Iterate the argument so it can check if the flag is inside the argument or not. 
+    for arg in args{ 
+        if arg.starts_with(flag){ 
+            // Slices the argument after the flag and catchs the route as an argument 
+            let route = String::from(&arg[flag.len()..]);
+            if route.ends_with(".efi"){
+                // If the archive the user is trying to give as an argument exists, it returns it. 
+                if it_exists(Some(&route)){ 
+                    return Some(route);  
                 }
             }
         }
     }
+    // If the route given as an argument didn't find anything useful, tries the default route. 
     let default_route = String::from("/usr/bin/lib/spark/sparkx64.efi"); 
-    // This condition tries to execute the default installation route if the previous one failed. 
     if it_exists(Some(&default_route)){
         return Some(default_route)
     }
@@ -95,51 +98,49 @@ pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
     return None;
 }
 
-// Shows if an archive exists or not.
+/// Shows if an archive exists or not, returns a boolean.
 pub fn it_exists(route: Option<&str>) -> bool{
+    // If the archive exists, it returns true, if not, it returns false. 
     match route{
         Some(path) => {
-            Path::new(&path).exists() // If the archive exists, it returns true, else, false.
+            Path::new(&path).exists()
         },
-        None => false // If the archive does not exists, it returns false 
-    } 
+        None => false 
+    }
 }
 
-// Dir operations such as deleting or creating directories
+/// Dir operations such as deleting or creating directories
 pub fn dir_operations(operations: Directories,_route: Option<String>){
+    // Those are the directories that spark needs to work properly. 
     let dir_array: [&str;3] = ["/EFI/BOOT", "/EFI/spark", "/loader/entries"]; 
-    let esp = detect_vfat(); // The installation/uninstall routes
+    /*
+     * This is important, parse the mount routes and detects which route of the system is assigned
+     * for the ESP to be installed
+    */
+    let esp = detect_vfat();
+    // This code is needed to convert the Option<String> value to a String type value. 
     let esp = match esp{ 
-        Some(esp) => esp, // Converts the Option<String> type to String type. 
-        None => { // If it didn't found any compatible route then:
+        Some(esp) => esp,
+        None => {
             eprintln!("Haven't found any FAT32 file system, mounted on /boot, /boot/efi or /efi.");
-            return; // Ends the operations here.
+            return;
         }
     };
-    for dir in 0..dir_array.len(){
-        let full_route = format!("{}{}",esp,dir_array[dir]);
-        if !it_exists(Some(&full_route)){ // If the directory does not exists 
-            match operations{
-                Directories::Create => { // And the operation is create 
-                    match create_dir_all(full_route){ // Create the directories 
-                        Ok(_) => continue, // Continue with the execution 
-                        Err(error) => eprintln!("Error: {}",error) // If there is an error, print it. 
-                    }
-                },
-                Directories::Delete => { // And the operation is delete 
-                    continue // Continue with the iteration. 
+    // This for is needed so the program can iterate the array of the routes and create them later.
+    for dir in dir_array{
+        let full_route = format!("{}{}",esp,dir);
+        match operations {
+            Directories::Create => {
+                if let Err(error) = create_dir_all(&full_route){
+                    eprintln!("Error creating {}: {}",full_route,error);
                 }
-            }
-        } else { // If the directory exists
-            match operations{
-                Directories::Delete => { // And the operation is delete 
-                    match remove_dir_all(full_route){ // Remove the directory 
-                        Ok(_) => {}, // If the operation is successfull, continue 
-                        Err(error) => {eprintln!("Error: {}", error)} // If there is an error, print it 
+            },
+            // To delete directories, first is needed to know if the directory actually exists or not
+            Directories::Delete => {
+                if it_exists(Some(&full_route)){
+                    if let Err(error) = remove_dir_all(&full_route){
+                        eprintln!("Error removing {}: {}",full_route,error);
                     }
-                }
-                Directories::Create => { // And the operation is create 
-                    continue // Continue with the iteratio 
                 }
             }
         }
@@ -147,7 +148,7 @@ pub fn dir_operations(operations: Directories,_route: Option<String>){
 }
 
 
-// Help message that will show up when spark is used with a wrong argument. 
+/// Help message that will show up when spark is used with a wrong argument. 
 pub fn show_help() {
     print!("Usage: spark [COMMAND] [OPTIONS] 
     
