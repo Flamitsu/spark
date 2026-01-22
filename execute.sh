@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-# Check if running as root
-# This final script will install the bootmanager into the VM enviroment (working on it)
-if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root (use doas/sudo)." 
-   exit 1
-fi
+# This adds the needed targets for the compilation
+rustup target add x86_64-unknown-uefi && rustup target add x86_64-unknown-linux-gnu && echo "Rust targets were added correctly."
+cargo build-normal && cargo build-uefi;
+# Changes to the current binary directory
+cd target/x86_64-unknown-linux-gnu/debug/
+doas ./spark install --efi-bin=../../x86_64-unknown-uefi/debug/sparkx64.efi || sudo ./spark install --efi-bin=../../x86_64-unknown-uefi/debug/sparkx64;
