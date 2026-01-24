@@ -1,6 +1,6 @@
 use crate::cli::confirmation;
-use crate::esp::{Operations, dir_operations};
-use crate::kernel::{detect_kernels}; // Modules from the auto_detect crate 
+use crate::boot::esp::{Operations, dir_operations};
+use crate::boot::kernel::{detect_kernels}; // Modules from the auto_detect crate 
 
 // This is the code that spark uses for the installation process of the EFI binary
 pub fn install(skip_confirmation: bool, efi_binary: Option<String>){
