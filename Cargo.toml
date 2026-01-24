@@ -4,12 +4,6 @@ version = "0.1.0" # Version of the project
 edition = "2024"
 description = "Bootloader made purely in rust. Supports only UEFI. Designed for those who wants stability in their bootloader." # Description of the program
 
-[dependencies.efivar]
-package = "efivar"
-version = "2.0.0"
-optional = true
-features = []
-
 [dependencies.uefi] 
 package = "uefi"
 version = "0.36.1"
@@ -27,7 +21,7 @@ path = "src/bin/spark/main.rs"
 
 [features]
 sparkx64 = ["uefi"] # The only using the uefi crate is the sparkx64 binary
-spark = ["efivar"]
+spark = []
 
 [profile.dev]
 panic = "abort"

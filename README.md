@@ -26,6 +26,8 @@
 
 - [X] Establishing an ESP directory map
 
+- [ ] Reading the NVRAM variables
+
 - [ ] Modifying the NVRAM variables successfully
 
 - [ ] Generating operating system entries
@@ -76,4 +78,3 @@ To contribute to this project you should look at the [contributing guidelines](h
 This project is licensed under the [MIT](https://github.com/Flamitsu/spark/blob/main/LICENSE-MIT) license or under the [Apache 2.0 license](https://github.com/Flamitsu/spark/blob/main/LICENSE-APACHE)
 ## Credits
 - [uefi](https://github.com/rust-osdev/uefi-rs/tree/main) - Crate to interact with the UEFI in Rust.
-- [efivar](https://github.com/itrooz/efivar-rs) - Crate to manipulate NVRAMs.
