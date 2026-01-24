@@ -1,55 +1,79 @@
 # Spark
-# Alpha stage
-Spark is a minimalist bootmanager written in Rust. Its goal is to be lightweight, secure, and stable bootmanager. 
-
+## Alpha stage
+**BIG DISCLAIMER** - **Spark** is an **ALPHA STAGE boot manager** written in Rust, **IT IS NOT MEANT TO BE USED IN PRODUCTION AT THIS MOMENT**.
+## Table of contents
+- [Description](#description)
+- [Features](#features)
+- [TODO](#todo)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Execution](#execution)
+- [Contribution](#contribution)
+- [License](#license)
+- [Credits](#credits)
+## Description
+**Spark** is a **boot manager** written in Rust that aims for **speed** and **stability** during the **boot** process.
 ## Features
+- Minimalist
+- Fast
+- Stable
+- Maintainable and modular
+## TODO
+### TODO (general binary):
+- [X] ESP automatic detection
 
-- Minimalist and fast
-- Written in Rust
-- Easy to maintain and update
-- Designed to evolve into a rEFInd-like boot manager, but more stable
+- [X] Installation process and removal
 
+- [X] Establishing an ESP directory map
+
+- [ ] Modifying the NVRAM variables successfully
+
+- [ ] Generating operating system entries
+
+- [ ] Supporting custom signatures of the binary
+### TODO (UEFI binary):
+- [X] Detect user input
+
+- [ ] Booting any kernel an initramfs
+
+- [ ] Supporting firmware signatures
+
+- [ ] Choose between entries
+
+- [ ] Parsing the system's entries in the ESP
+
+- [ ] Customization of the general config file
 ## Requirements
-
-- UEFI (Not planning in the future supporting BIOS, this can change tho.)
-- Rust installed
+- UEFI firmware
+- Rustup configured
 - x86_64 architecture
-- QEMU installed and configured with an instance of a Linux OS
-- QEMU virtual snapshot of the virtual machine before executing the program
-- FAT32 file system mounted in either '/boot,/boot/efi,/efi'. If not, the program will not know where to put the installation files and the install function will not work. 
+- QEMU installed and configured with a Linux OS instance
+- QEMU virtual snapshot of the virtual machine before executing the software
+- FAT32 file system mounted in either `/boot`,`/boot/efi` or `/efi`
 ## Installation
+Make sure you have the [rustup](https://rust-lang.org/tools/install/) toolchain before trying to build the binary.
 
-Clone the repository and compile:
-
+Clone the repository and compile: 
 ```bash
 git clone https://github.com/Flamitsu/spark
 cd spark
-cargo build-uefi # For the uefi binary
-cargo build-normal # For the general binary
+cargo build-uefi # This command builds the binary for the .efi bin.
+cargo build-normal # This command builds the general binary.
 ```
-
-If the command
-```bash
-cargo build-uefi
-```
-gave you any error, you should execute this command:
-```bash
-rustup target add x86_64-unknown-uefi
-```
-Then re-run the cargo build command.
-
+However, `cargo build-uefi` may produce an error. If that happens, it may be that you don't have the toolchain installed. 
+To proceed execute: `rustup target add x86_64-unknown-uefi` and re-run: `cargo build-uefi` command.
 ## Execution
+### Disclaimer
+> This code is still work in progress and it is not meant to be executed in the host machine in any way. You should have a QEMU snapshot (or the software you are using to virtualize an environment) and then execute the software.
 
-For the execution of the program, I strongly recommend trying it inside a virtual machine.
-I have the execute.sh script for this porpouse. IT IS NOT MEANT TO BE EXECUTED INSIDE THE HOST MACHINE.
-Inside a virtual machine, for example with Debian installed, or another distro, you can try the program.
-Clone the repository, execute the script, and it will automatically reboot. Then choose the entry that is named Spark.
-If something goes wrong, I recommend to rollback to the previous snapshot, open an issue and describing the problem. Take in mind this is still work in progress and will be.
+To execute the binary, it is **extremely recommended** to be inside a **virtual machine**.
 
-When the project is already compiled and ready for execution, execute the next line of code:
-INSTALLATION COMMAND:
-```bash
-cd target/x86_64-unknown-linux-gnu/debug/
-./spark install --efi-bin=../../x86_64-unknown-uefi/debug/sparkx64.efi
-```
-And that will install the EFI binary inside your ESP partition.
+After the installation process is complete, you need to run the following command: `./execute.sh`, reboot the virtual machine and it should boot the EFI binary.
+
+## Contribution
+To contribute to this project you should look at the [contributing guidelines](https://github.com/Flamitsu/spark/blob/main/CONTRIBUTING.md) first.
+## License
+This project is licensed under the [MIT](https://github.com/Flamitsu/spark/blob/main/LICENSE-MIT) license or under the [Apache 2.0 license](https://github.com/Flamitsu/spark/blob/main/LICENSE-APACHE)
+## Credits
+- [uefi](https://github.com/rust-osdev/uefi-rs/tree/main) - Crate to interact with the UEFI in Rust.
+- [efivar](https://github.com/itrooz/efivar-rs) - Crate to manipulate NVRAMs.
