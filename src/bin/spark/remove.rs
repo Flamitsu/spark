@@ -1,5 +1,6 @@
 // This is the script for the uninstall of the spark program
-use crate::utils::{Directories, confirmation, dir_operations};
+use crate::cli::confirmation;
+use crate::esp::{Operations, dir_operations};
 /*
 * Work in progress, this is meant to remove the spark installation if you execute it.
 */
@@ -13,5 +14,5 @@ pub fn remove_installation(skip_confirmation: bool, efi_bin: Option<String>){
         println!("The removal process has been aborted.");
         return 
     };
-    dir_operations(Directories::Delete, efi_bin);
+    dir_operations(Operations::Delete, efi_bin);
 }
