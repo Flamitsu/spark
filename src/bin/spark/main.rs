@@ -4,6 +4,7 @@ mod utils;
 mod cli;
 mod commands;
 mod boot;
+mod nvram;
 // This is the main code flow for the general spark binary
 fn main() {
     let argument: Vec<String> = env::args().collect(); // Detect user input
