@@ -7,7 +7,6 @@ mod boot;
 mod nvram;
 // This is the main code flow for the general spark binary
 fn main() {
-    nvram::count::count_entries();
     let argument: Vec<String> = env::args().collect(); // Detect user input
     if argument.len() < 2 { // dry-run
         cli::show_help(); // Shows help so the user know what to execute
