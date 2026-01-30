@@ -7,24 +7,29 @@ mod boot;
 mod nvram;
 // This is the main code flow for the general spark binary
 fn main() {
+    // This catchs the user input
     let argument: Vec<String> = env::args().collect(); // Detect user input
-    if argument.len() < 2 { // dry-run
-        cli::show_help(); // Shows help so the user know what to execute
+    // This is when the argument is a dry-run (No argument) 
+    if argument.len() < 2 {
+        cli::show_help();
         return;
-    }
-    // Arguments
-    let skip_conf = cli::skip_confirmation(&argument); // Parses the argument  
-    let efi_bin = cli::get_efi_bin_path(&argument); // Parses the argument 
-    match argument[1].as_str() { // Converts the argument into string 
+    } 
+    // If the user uses '-y or --yes' as argument, it skips confirmation.
+    let skip_conf = cli::skip_confirmation(&argument);
+    // If the user uses --efi-bin={path} as argument, it uses it to install it in the ESP
+    let efi_bin = cli::get_efi_bin_path(&argument);
+    // Converts the collected argument into a string and divides it into different options.
+    match argument[1].as_str() { 
         "install" => commands::install::install(skip_conf, efi_bin),
         "remove" => commands::remove::remove_installation(skip_conf, efi_bin), 
-        "help" => cli::show_help(), // Shows the help about the program
+        "help" => cli::show_help(),
         "clean" => commands::clean::clean_entries(),
         "update" => commands::update::update_entries(),
-        _ => { // If the user says something not contemplated before:
-            eprintln!("Unknown argument: {}", argument[1]); // Unknown argument with the argument
-            cli::show_help(); // Show help argument
-            exit(1); // Exit the process 
+        // If the user says something that the program can't understand, then:
+        _ => {
+            eprintln!("Unknown argument: {}", argument[1]);
+            cli::show_help();
+            exit(1); 
         }
     }
 }
