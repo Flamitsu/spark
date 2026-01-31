@@ -62,17 +62,18 @@ pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
 pub fn confirmation(context: &str) -> bool{
     println!("Type 'YES' to {} spark, or 'NO' to cancel: ", context);
     // Cleans the stdout buffer. 
-    stdout().flush().unwrap();
+    stdout().flush().ok();
     // Creates a new string where the input of the user is going to be storaged.
     let mut decision = String::new();
     // Read the input and storage it to the 'decision' variable. 
-    stdin().read_line(&mut decision).unwrap(); 
+    stdin().read_line(&mut decision).ok(); 
 
     match decision.trim() { // Match the options
         "YES" => return true, 
         "NO" => return false,
+        // If the user uses the argument wrong, the program assumes 'NO'.
         _ => {
-            eprintln!("The program did not understood the input. Assuming 'NO'."); // If the user said something that is not 'NO' or 'YES' it returns false
+            eprintln!("The program did not understood the input. Assuming 'NO'.");
             return false
         }
     }

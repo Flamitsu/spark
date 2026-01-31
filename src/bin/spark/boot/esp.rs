@@ -33,7 +33,7 @@ fn detect_vfat() -> Option<String>{ // It returns the string with the final inst
     // If the neither one of the lines matches the requirements, the program returns None. 
     return None; 
 }
-// This function is a confirmation for important operations such as delete or create directories in the file system.
+/// This function is a confirmation for important operations such as delete or create directories in the file system.
 pub fn dir_operations(operations: Operations,route: Option<String>){
     // Those are the directories that spark needs to work properly. 
     let dir_array: [&str;3] = ["/EFI/BOOT", "/EFI/spark", "/loader/entries"]; 

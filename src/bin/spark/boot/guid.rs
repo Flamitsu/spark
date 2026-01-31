@@ -1,6 +1,11 @@
 use std::fs;
 use std::process::exit;
-// detect the devices of the current running system
+/// Read the GUID LE bytes to see if it is ESP worth it 
+pub fn _read_guid_bytes(){
+    print!("This should do something")
+}
+
+/// Detect the devices of the current running system and returns them into a Vec<String>
 pub fn _detect_devices() -> Vec<String>{
     let route:&str = "/sys/block/";
     let mut disks = Vec::new();
