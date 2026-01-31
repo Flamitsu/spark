@@ -20,8 +20,8 @@ pub fn detect_devices() -> Vec<String>{
             let file_name = entry.file_name().into_string().unwrap();
             /* If there is any sd device or nvme device and it is not a partition, the program will
              add the /dev/{device} to the 'disks' vector.*/
-            if file_name.starts_with("sd") && file_name.len() == 3 
-            || file_name.starts_with("nvme") && !file_name.contains("p"){
+            if file_name.starts_with("sd") || 
+            (file_name.starts_with("nvme")) && (!file_name.contains("p")){
                 disks.push(format!("/dev/{}",file_name))
             } 
         }
