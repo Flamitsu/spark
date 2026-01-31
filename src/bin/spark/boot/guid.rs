@@ -1,33 +1,62 @@
-use std::fs;
+use std::fs::{self, File};
+// use std::io::{Seek, SeekFrom};
 use std::process::exit;
-/// Read the GUID LE bytes to see if it is ESP worth it 
-pub fn _read_guid_bytes(){
-    todo!("This should read the GUID LE bytes to see if the device is ESP worth.");
+/// Read the GUID little endian (LE) and big endian (BE) bytes to see if it is ESP worth it 
+pub fn read_guid_bytes(){
+    let disks = detect_devices();
+    // The sector size in bytes 
+    let sector_size:u64 = 512;
+    // The Logical Block Addresing 2 is where the GUID needed is located.
+    let lba_index:u64 = 2;
+    // The offset byte is where the disk is started to get read
+    let _offset:u64 = sector_size * lba_index;
+    let _esp_guid_bytes: [u8;16]= [
+        0x28, 0x73, 0x2A, 0xC1, // (LE) DATASET1 -> 28 73 2A C1 -> C12A7328 
+        0x1F, 0xF8, // (LE) DATASET2 -> 1F F8 -> 1FF8
+        0xD2, 0x11, // (LE) DATASET3 -> 11 D2 -> D211
+        0xBA, 0x4B, // (LE) DATASET4 -> BA 4B -> BA4B
+        0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
+        /* 
+         * In the end, all this values form this last GUID in LE:
+         * LE AND BE (GUID RAW): 28 73 2A C1 1F F8 11 D2 BA 4B 00 A0 C9 3E C9 3B 
+         * String (GUID LE AND BE to String): C12A7328-1FF8-D211-BA4B-00A0C93EC93B
+        */
+    ];
+    for disk_path in disks{
+        let _disk = if let Ok(open_disk) = File::open(&disk_path){
+            open_disk
+        } else{
+            eprintln!("Error. Can not open the disk {} check if you have enough privilegies.",disk_path);
+            continue;
+        };
+    }
+     // todo!("This should read the GUID LE bytes to see if the device is ESP worth.");
 }
 
 /// Detect the devices of the current running system and returns them into a Vec<String>
 pub fn detect_devices() -> Vec<String>{
     let route:&str = "/sys/block/";
-    let mut disks = Vec::new();
-    let entries = if let Ok(operation_result) = fs::read_dir(&route){
-        operation_result
+    let mut disks:Vec<String> = Vec::new();
+    let disk_devices = if let Ok(list_devices) = fs::read_dir(&route){
+        list_devices
     } else{
         eprintln!("Error. Can not read the {} route. Check if you have enough privilegies.", route);
         exit(2);
     };
-    for entry in entries{
-        if let Ok(entry) = entry{
-            let file_name = entry.file_name().into_string().unwrap();
+    for disk in disk_devices{
+        if let Ok(disk) = disk{
+            if let Ok(disk_name) = disk.file_name().into_string(){
             /* If there is any sd device or nvme device and it is not a partition, the program will
              add the /dev/{device} to the 'disks' vector.*/
-            if file_name.starts_with("sd") || 
-            (file_name.starts_with("nvme")) && (!file_name.contains("p")){
-                disks.push(format!("/dev/{}",file_name))
-            } 
+                if (disk_name.starts_with("sd") && disk_name.len() > 3) || 
+                (disk_name.starts_with("nvme") && !disk_name.contains("p")){
+                    disks.push(format!("/dev/{}",disk_name))
+                }
+            } else{
+                eprintln!("Error. Can not iterate correctly through a disk inside '{}'.",route);
+                continue;
+            }
         }
     }
-    println!("{}",disks[0]);
-    println!("{}",disks[1]);
     return disks;
-
 }

@@ -1,5 +1,5 @@
 use std::env; // Provides the functionality for the arguments 
-use std::process::exit; // Provides the correct function to exit the script
+use std::process::exit;// Provides the correct function to exit the script
 mod utils;
 mod cli;
 mod commands;
@@ -7,7 +7,6 @@ mod boot;
 mod nvram;
 // This is the main code flow for the general spark binary
 fn main() {
-    boot::guid::detect_devices();
     // This catchs the user input
     let argument: Vec<String> = env::args().collect(); // Detect user input
     // This is when the argument is a dry-run (No argument) 
@@ -26,6 +25,7 @@ fn main() {
         "help" => cli::show_help(),
         "clean" => commands::clean::clean_entries(),
         "update" => commands::update::update_entries(),
+        "test" => boot::guid::read_guid_bytes(), // Test parameter designed to try the WIP func.
         // If the user says something that the program can't understand, then:
         _ => {
             eprintln!("Unknown argument: {}", argument[1]);
