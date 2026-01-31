@@ -4,5 +4,5 @@
 * Meant to check the kernels inside the system. Currently work in progress. 
 */
 pub fn detect_kernels(){
-    println!("Checking for kernels installed in this OS...") // Placeholder
+    todo!("This function should check for installing kernels inside the OS.");
 }

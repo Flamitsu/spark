@@ -2,11 +2,11 @@ use std::fs;
 use std::process::exit;
 /// Read the GUID LE bytes to see if it is ESP worth it 
 pub fn _read_guid_bytes(){
-    print!("This should do something")
+    todo!("This should read the GUID LE bytes to see if the device is ESP worth.");
 }
 
 /// Detect the devices of the current running system and returns them into a Vec<String>
-pub fn _detect_devices() -> Vec<String>{
+pub fn detect_devices() -> Vec<String>{
     let route:&str = "/sys/block/";
     let mut disks = Vec::new();
     let entries = if let Ok(operation_result) = fs::read_dir(&route){
@@ -26,5 +26,8 @@ pub fn _detect_devices() -> Vec<String>{
             } 
         }
     }
+    println!("{}",disks[0]);
+    println!("{}",disks[1]);
     return disks;
+
 }

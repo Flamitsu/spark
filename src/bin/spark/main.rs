@@ -7,6 +7,7 @@ mod boot;
 mod nvram;
 // This is the main code flow for the general spark binary
 fn main() {
+    boot::guid::detect_devices();
     // This catchs the user input
     let argument: Vec<String> = env::args().collect(); // Detect user input
     // This is when the argument is a dry-run (No argument) 
@@ -29,7 +30,7 @@ fn main() {
         _ => {
             eprintln!("Unknown argument: {}", argument[1]);
             cli::show_help();
-            exit(1); 
+            exit(1);
         }
     }
 }
