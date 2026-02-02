@@ -7,7 +7,7 @@ pub fn count_entries() -> u16{
     let entries = if let Ok(operation_result) = fs::read_dir(&nvram_directory){
         operation_result
     } else{
-        eprintln!("Error while reading the NVRAM variables. Check if you have enough privilegies.");
+        eprintln!("Error while reading the NVRAM variables. Check if you have enough privileges.");
         return 0;
     };
     /*
