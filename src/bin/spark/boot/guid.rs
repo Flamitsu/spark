@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::io::{Seek, SeekFrom, Read};
 use std::process::exit;
-/// Read the GUID little endian (LE) and big endian (BE) bytes to see if it is ESP worth it 
+/// Read the GUID little endian (LE) and big endian (BE) bytes to see if the device contains an ESP partition 
 pub fn esp_guid_device() -> Option<String>{
     let disks = detect_devices();
     /* If you wonder why those integers are u64 and not u16 and u8, because I can't. seek method do 
@@ -39,6 +39,7 @@ pub fn esp_guid_device() -> Option<String>{
         }
         // Creates a buffer to read the GUID 
         let mut buffer = [0u8;16];
+        println!("{}",disk_path);
         // Reads the buffer and if there is an error it says it to the user.
         if let Err(error) = disk.read_exact(&mut buffer){
             eprintln!("Can not read bytes from {} : {}",disk_path,error);
@@ -54,6 +55,12 @@ pub fn esp_guid_device() -> Option<String>{
     }
     return None;
 }
+// This function should work for getting the block size in the disk to know if LBA2 is in 1024(512)
+// or in another block size like 4096. 
+pub fn _get_block_size() -> u16{
+    1
+}
+
 
 /// Detect the devices of the current running system and returns them into a Vec<String>
 pub fn detect_devices() -> Vec<String>{
