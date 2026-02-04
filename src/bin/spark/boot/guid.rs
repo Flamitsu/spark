@@ -33,35 +33,33 @@ pub fn esp_guid_device() -> Option<String>{
         continue;
         };
         // Moves the cursor to an specific offset.
+        let max_entries:u8 = 128;
         if let Err(error) = disk.seek(SeekFrom::Start(offset)){
-            eprintln!("Error {error}. Can not move the disk pointer to the LBA2 sector in the disk.");
+            eprintln!("Error. Can not move the disk pointer to the LBA2 sector in the disk. {error}");
             continue;
         }
-        // Creates a buffer to read the GUID 
-        let mut buffer = [0u8;16];
-        println!("{}",disk_path);
-        // Reads the buffer and if there is an error it says it to the user.
-        if let Err(error) = disk.read_exact(&mut buffer){
-            eprintln!("Can not read bytes from {} : {}",disk_path,error);
-            continue;
+        // Reads all the possible 128 entries possible in the GPT partitions.
+        for _number in 1..max_entries{
+            let offset = 128;
+            // Creates a buffer to read the GUID
+            let mut buffer = [0u8; 16];
+            // Reads the buffer and if there is an error it says it to the user.
+            if let Err(error) = disk.read_exact(&mut buffer){
+                eprintln!("Can not read bytes from {} : {}", disk_path,error);
+                continue;
+            } else{
+                // If the disk has a ESP partition, then, the disk is returned.
+                if buffer == esp_guid_bytes{
+                    return Some(disk_path);
+                }
+            };
+            if let Err(error) = disk.seek(SeekFrom::Start(offset)){
+                eprintln!("Error. Can not move the disk pointer to the LBA2 sector in the disk. {error}")
+            }
         }
-        else {
-            // If the disk has a ESP partition, then, the disk is returned
-            if buffer == esp_guid_bytes{
-                return Some(disk_path);
-            } 
-            continue;
-        };
-    }
+    };
     return None;
 }
-// This function should work for getting the block size in the disk to know if LBA2 is in 1024(512)
-// or in another block size like 4096. 
-pub fn _get_block_size() -> u16{
-    1
-}
-
-
 /// Detect the devices of the current running system and returns them into a Vec<String>
 pub fn detect_devices() -> Vec<String>{
     let route:&str = "/sys/block/";
