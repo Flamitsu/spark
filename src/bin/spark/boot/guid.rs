@@ -3,65 +3,76 @@ use std::io::{Seek, SeekFrom, Read};
 use std::process::exit;
 /// Read the GUID little endian (LE) and big endian (BE) bytes to see if the device contains an ESP partition 
 pub fn esp_guid_device() -> Option<String>{
+    // The disks aviables inside the system. 
     let disks = detect_devices();
-    /* If you wonder why those integers are u64 and not u16 and u8, because I can't. seek method do 
-    * not support it.*/ 
-    // The sector size in bytes 
-    let sector_size:u64 = 512;
-    // The Logical Block Addresing 2 is where the GUID needed is located.
-    let lba_index:u64 = 2;
-    // The offset byte is where the disk is started to get read
-    let offset:u64 = sector_size * lba_index;
-    let esp_guid_bytes: [u8;16]= [
+    /*
+    * All this values from the last GUID in LE to the first:
+    * LE and BE (GUID RAW): 28 73 2A C1 1F F8 11 D2 BA 4B 00 A0 C9 3E C9 3B 
+    * String (GUID LE and BE to String): C12A7328-1FF8-D211-BA4B-00A0C93EC93B 
+    */
+    const ESP_GUID_BYTES: [u8;16]= [
         0x28, 0x73, 0x2A, 0xC1, // (LE) DATASET1 -> 28 73 2A C1 -> C12A7328 
         0x1F, 0xF8, // (LE) DATASET2 -> 1F F8 -> 1FF8
         0xD2, 0x11, // (LE) DATASET3 -> 11 D2 -> D211
         0xBA, 0x4B, // (LE) DATASET4 -> BA 4B -> BA4B
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
-        /* 
-         * In the end, all this values form this last GUID in LE:
-         * LE AND BE (GUID RAW): 28 73 2A C1 1F F8 11 D2 BA 4B 00 A0 C9 3E C9 3B 
-         * String (GUID LE AND BE to String): C12A7328-1FF8-D211-BA4B-00A0C93EC93B
-        */
     ];
     for disk_path in disks{
-        // If there is an error with a disk, the program will change this to true. 
-        let mut disk = if let Ok(open_disk) = File::open(&disk_path){
-            open_disk
-        } else{
-            eprintln!("Error. Can not open the disk {} check if you have enough privileges.",disk_path);
-        continue;
+        // If there is an error with a disk, the program will change this to true.
+        let mut disk = match File::open(&disk_path){
+            Ok(disk_file) => disk_file,
+            Err(error) => {
+                eprintln!("Error opening {} : {}",disk_path,error);
+                break;
+            }
         };
-        // Moves the cursor to an specific offset.
-        let max_entries:u8 = 128;
-        if let Err(error) = disk.seek(SeekFrom::Start(offset)){
-            eprintln!("Error. Can not move the disk pointer to the LBA2 sector in the disk. {error}");
-            continue;
-        }
+        // Moves the cursor to the LBA2 sector inside the disk.
+        if let Err(error) = disk.seek(SeekFrom::Start(1024)){
+            eprintln!("Error. Can not move the disk pointer to the LBA2 sector to read the partitions. {}",error);
+            break;
+        };
         // Reads all the possible 128 entries possible in the GPT partitions.
-        for _number in 1..max_entries{
-            let offset = 128;
+        for _ in 1..=128{
             // Creates a buffer to read the GUID
-            let mut buffer = [0u8; 16];
-            // Reads the buffer and if there is an error it says it to the user.
+            let mut buffer = [0u8;16];
+            
+            // Reads the buffer and if there is an error skips to the next disk.
             if let Err(error) = disk.read_exact(&mut buffer){
                 eprintln!("Can not read bytes from {} : {}", disk_path,error);
-                continue;
-            } else{
-                // If the disk has a ESP partition, then, the disk is returned.
-                if buffer == esp_guid_bytes{
-                    return Some(disk_path);
-                }
+                break;
             };
-            if let Err(error) = disk.seek(SeekFrom::Start(offset)){
-                eprintln!("Error. Can not move the disk pointer to the LBA2 sector in the disk. {error}")
+            
+            // If the disk has a ESP partition, then, the disk is returned.
+            if buffer == ESP_GUID_BYTES{
+                println!("{disk_path}");
+                return Some(disk_path);
+            }
+            
+            /*
+            * When the buffer is 000000... then it skips to the next disk
+            * because it should mean it is the end of the partition table.
+            */
+            if buffer == [0u8;16]{
+                break
+            };
+            
+            // Moves the cursor 128 bytes ahead. If there is an error, skips to the next disk.
+            if let Err(error) = disk.seek(SeekFrom::Current(128)){
+                eprintln!("Error. Can not move the disk pointer inside the LBA2 sector. {}",error);
+                break;
             }
         }
     };
     return None;
 }
+
+/// Detect the current number of partitions inside a disk reading the LBA1
+pub fn _number_partitions() -> u8{
+    todo!("This function is still work in progress. Reads the LBA1 to read how many entries there are inside the disk.");
+}
+
 /// Detect the devices of the current running system and returns them into a Vec<String>
-pub fn detect_devices() -> Vec<String>{
+fn detect_devices() -> Vec<String>{
     let route:&str = "/sys/block/";
     let mut disks:Vec<String> = Vec::new();
     let disk_devices = if let Ok(list_devices) = fs::read_dir(&route){
