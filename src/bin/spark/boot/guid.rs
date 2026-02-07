@@ -44,10 +44,8 @@ pub fn esp_guid_partition() -> Option<String>{
             // If the disk has a ESP partition, then, the disk is returned.
             if buffer == ESP_GUID_BYTES{
                 if disk_path.contains("sd"){
-                    println!("Detected ESP partition: {}{}",disk_path,partition_number);
                     return Some(format!("{}{}",disk_path,partition_number));
                 } else{
-                    println!("Detected ESP partition: {}p{}",disk_path,partition_number);
                     return Some(format!("{}p{}",disk_path,partition_number))
                 }
             }
@@ -73,8 +71,9 @@ pub fn esp_guid_partition() -> Option<String>{
 fn _entries_start_lba(){
     todo!("This function should get the LBA2 starting position instead of assume 1024 byte offset");
 }
+
 /// Function to see if the argument is a disk or not. 
-fn it_is_block_device (name: &str) -> bool{
+fn is_block_device (name: &str) -> bool{
     // If the disk is an nvme, it checks that the name does not contain a 'p':
     if name.starts_with("nvme") && !name.contains("p"){
         return true;
@@ -106,7 +105,7 @@ fn detect_devices() -> Vec<String>{
             if let Ok(disk_name) = disk.file_name().into_string(){
             /* If there is any sd device or nvme device and it is not a partition, the program will
              add the /dev/{device} to the 'disks' vector.*/
-                if it_is_block_device(&disk_name){    
+                if is_block_device(&disk_name){    
                     disks.push(format!("/dev/{}",disk_name))
                 }
             } else{

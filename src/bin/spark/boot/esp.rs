@@ -1,5 +1,5 @@
 use std::fs::{self,create_dir_all,remove_dir_all,copy};
-use crate::utils::it_exists;
+use crate::utils::exists;
 use crate::boot::guid::esp_guid_partition;
 use std::process::exit;
 /// Dir operations such as deleting or creating directories
@@ -79,7 +79,7 @@ pub fn dir_operations(operations: Operations,route: Option<String>){
             },
             // To delete directories, first is needed to know if the directory actually exists or not
             Operations::Delete => {
-                if it_exists(Some(&full_route)){
+                if exists(Some(&full_route)){
                     if let Err(error) = remove_dir_all(&full_route){
                         eprintln!("Error removing {}: {}",full_route,error);
                     }

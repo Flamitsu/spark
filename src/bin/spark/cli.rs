@@ -1,4 +1,4 @@
-use crate::utils::it_exists;
+use crate::utils::exists;
 use std::io::{Write, stdin,stdout};
 /// Function to skip user information. Needs a '-y' and '--yes' parameter when executed to skip the confirmation
 pub fn skip_confirmation(args: &[String]) -> bool{ 
@@ -43,7 +43,7 @@ pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
             let route = String::from(&arg[flag.len()..]);
             if route.ends_with(".efi"){
                 // If the archive the user is trying to give as an argument exists, it returns it. 
-                if it_exists(Some(&route)){ 
+                if exists(Some(&route)){ 
                     return Some(route);  
                 }
             }
@@ -51,7 +51,7 @@ pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
     }
     // If the route given as an argument didn't find anything useful, tries the default route. 
     let default_route = String::from("/usr/bin/lib/spark/sparkx64.efi"); 
-    if it_exists(Some(&default_route)){
+    if exists(Some(&default_route)){
         return Some(default_route)
     }
     // If the EFI bin parameter is not correct, and the default route is not correct, then the program fails to execute.  
