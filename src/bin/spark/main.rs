@@ -25,7 +25,7 @@ fn main() {
         "help" => cli::show_help(),
         "clean" => commands::clean::clean_entries(),
         "update" => commands::update::update_entries(),
-        "test" => {let _ = boot::guid::esp_guid_device();}, // Test parameter designed to try the WIP func.
+        "test" => { let _ = boot::guid::esp_guid_partition();}, // Test parameter designed to try the WIP func.
         // If the user says something that the program can't understand, then:
         _ => {
             eprintln!("Unknown argument: {}", argument[1]);

@@ -1,38 +1,39 @@
 use std::fs::{self,create_dir_all,remove_dir_all,copy};
 use crate::utils::it_exists;
+use crate::boot::guid::esp_guid_partition;
+use std::process::exit;
 /// Dir operations such as deleting or creating directories
 pub enum Operations{
     Create,
     Delete
 }
 
-/// This function detect the vfat partitions in the following mount points: '/boot,/boot/efi,/efi'.
-fn detect_vfat() -> Option<String>{ // It returns the string with the final installation route of the ESP 
+/// This function detects the mount point of the ESP partition.  
+fn esp_mountpoint() -> Option<String>{ // It returns the string with the final installation route of the ESP 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
-        .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this
-    /* 
-     * Runs and compares every line of the mounts variable route and see 
-     * if it matches the following requirements:
-     * Mountpoints either in /boot,/boot/efi or /efi.
-     * FAT32. Filesystem of the mountpoint. 
-    */
-    for line in mounts.lines() {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        // This comparation tries to chop off wrong-formatted lines
-        if parts.len() >= 3 { 
-            let mount_point = parts[1]; 
-            let file_system = parts[2];
-            if (file_system == "vfat") && 
-            (mount_point == "/boot" ||
-            mount_point == "/boot/efi" ||
-            mount_point == "/efi"){
-                return Some(mount_point.to_string());
-            };
-        };
+        .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this 
+    let esp_partition = match esp_guid_partition(){
+        Some(partition) => partition,
+        None => {
+            eprintln!("There is no ESP in the system.");
+            exit(3);
+        }
     };
-    // If the neither one of the lines matches the requirements, the program returns None. 
+    for device in mounts.lines(){
+        let mount: Vec<&str> = device.split_whitespace().collect();
+        if mount.len() >= 3{
+            let device = mount[0];
+            let mount_route = mount[1];
+            let file_system = mount[2];
+            if (&device == &esp_partition) && (file_system == "VFAT"){
+                return Some(mount_route.to_string())
+            }
+        }
+    }
+    eprintln!("The program found the ESP partition {} but can't find the mount point. Try to mount the ESP partition first.", esp_partition);
     return None; 
 }
+
 /// This function is a confirmation for important operations such as delete or create directories in the file system.
 pub fn dir_operations(operations: Operations,route: Option<String>){
     // Those are the directories that spark needs to work properly. 
@@ -41,12 +42,11 @@ pub fn dir_operations(operations: Operations,route: Option<String>){
      * This is important, parse the mount routes and detects which route of the system is assigned
      * for the ESP to be installed
     */ 
-    let esp = detect_vfat();
+    let esp = esp_mountpoint();
     // This code is needed to convert the Option<String> value to a String type value. 
     let esp = match esp{ 
         Some(esp) => esp,
         None => {
-            eprintln!("Haven't found any FAT32 file system, mounted on /boot, /boot/efi or /efi.");
             return;
         }
     };

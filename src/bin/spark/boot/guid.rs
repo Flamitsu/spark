@@ -2,7 +2,7 @@ use std::fs::{self, File};
 use std::io::{Seek, SeekFrom, Read};
 use std::process::exit;
 /// Read the GUID little endian (LE) and big endian (BE) bytes to see if the device contains an ESP partition 
-pub fn esp_guid_device() -> Option<String>{
+pub fn esp_guid_partition() -> Option<String>{
     // The disks aviables inside the system. 
     let disks = detect_devices();
     /*
@@ -18,24 +18,28 @@ pub fn esp_guid_device() -> Option<String>{
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
     ];
     for disk_path in disks{
+        
         // If there is an error with a disk, the program will change this to true.
         let mut disk = match File::open(&disk_path){
             Ok(disk_file) => disk_file,
             Err(error) => {
                 eprintln!("Error opening {} : {}",disk_path,error);
-                break;
+                continue;
             }
         };
+        
         // Moves the cursor to the LBA2 sector inside the disk.
         if let Err(error) = disk.seek(SeekFrom::Start(1024)){
             eprintln!("Error. Can not move the disk pointer to the LBA2 sector to read the partitions. {}",error);
-            break;
+            continue;
         };
+
         // Reads all the possible 128 entries possible in the GPT partitions.
-        for _ in 1..=128{
+        for partition_number in 1..=128{
+            
             // Creates a buffer to read the GUID
             let mut buffer = [0u8;16];
-            
+
             // Reads the buffer and if there is an error skips to the next disk.
             if let Err(error) = disk.read_exact(&mut buffer){
                 eprintln!("Can not read bytes from {} : {}", disk_path,error);
@@ -44,8 +48,13 @@ pub fn esp_guid_device() -> Option<String>{
             
             // If the disk has a ESP partition, then, the disk is returned.
             if buffer == ESP_GUID_BYTES{
-                println!("{disk_path}");
-                return Some(disk_path);
+                if disk_path.contains("sd"){
+                    println!("Detected ESP partition: {}{}",disk_path,partition_number);
+                    return Some(format!("{}{}",disk_path,partition_number));
+                } else{
+                    println!("Detected ESP partition: {}p{}",disk_path,partition_number);
+                    return Some(format!("{}p{}",disk_path,partition_number))
+                }
             }
             
             /*
@@ -53,11 +62,11 @@ pub fn esp_guid_device() -> Option<String>{
             * because it should mean it is the end of the partition table.
             */
             if buffer == [0u8;16]{
-                break
+                break;
             };
             
-            // Moves the cursor 128 bytes ahead. If there is an error, skips to the next disk.
-            if let Err(error) = disk.seek(SeekFrom::Current(128)){
+            // Moves the cursor 112 bytes ahead. If there is an error, skips to the next disk.
+            if let Err(error) = disk.seek(SeekFrom::Current(112)){
                 eprintln!("Error. Can not move the disk pointer inside the LBA2 sector. {}",error);
                 break;
             }
@@ -66,9 +75,9 @@ pub fn esp_guid_device() -> Option<String>{
     return None;
 }
 
-/// Detect the current number of partitions inside a disk reading the LBA1
-pub fn _number_partitions() -> u8{
-    todo!("This function is still work in progress. Reads the LBA1 to read how many entries there are inside the disk.");
+// Function still WIP 
+fn _entries_start_lba(){
+    todo!("This function should get the LBA2 starting position instead of assume 1024 byte offset");
 }
 
 /// Detect the devices of the current running system and returns them into a Vec<String>
