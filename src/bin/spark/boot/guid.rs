@@ -18,7 +18,6 @@ pub fn esp_guid_partition() -> Option<String>{
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
     ];
     for disk_path in disks{
-        
         // If there is an error with a disk, the program will change this to true.
         let mut disk = match File::open(&disk_path){
             Ok(disk_file) => disk_file,
@@ -27,7 +26,6 @@ pub fn esp_guid_partition() -> Option<String>{
                 continue;
             }
         };
-        
         // Moves the cursor to the LBA2 sector inside the disk.
         if let Err(error) = disk.seek(SeekFrom::Start(1024)){
             eprintln!("Error. Can not move the disk pointer to the LBA2 sector to read the partitions. {}",error);
@@ -36,16 +34,13 @@ pub fn esp_guid_partition() -> Option<String>{
 
         // Reads all the possible 128 entries possible in the GPT partitions.
         for partition_number in 1..=128{
-            
             // Creates a buffer to read the GUID
             let mut buffer = [0u8;16];
-
             // Reads the buffer and if there is an error skips to the next disk.
             if let Err(error) = disk.read_exact(&mut buffer){
                 eprintln!("Can not read bytes from {} : {}", disk_path,error);
                 break;
             };
-            
             // If the disk has a ESP partition, then, the disk is returned.
             if buffer == ESP_GUID_BYTES{
                 if disk_path.contains("sd"){
@@ -64,7 +59,6 @@ pub fn esp_guid_partition() -> Option<String>{
             if buffer == [0u8;16]{
                 break;
             };
-            
             // Moves the cursor 112 bytes ahead. If there is an error, skips to the next disk.
             if let Err(error) = disk.seek(SeekFrom::Current(112)){
                 eprintln!("Error. Can not move the disk pointer inside the LBA2 sector. {}",error);
@@ -78,6 +72,23 @@ pub fn esp_guid_partition() -> Option<String>{
 // Function still WIP 
 fn _entries_start_lba(){
     todo!("This function should get the LBA2 starting position instead of assume 1024 byte offset");
+}
+/// Function to see if the argument is a disk or not. 
+fn it_is_block_device (name: &str) -> bool{
+    // If the disk is an nvme, it checks that the name does not contain a 'p':
+    if name.starts_with("nvme") && !name.contains("p"){
+        return true;
+    };
+    // If the name is longer than 3, starts with 'vd' or 'sd' and does not end in a number:
+    if (name.starts_with("sd") || name.starts_with("vd")) && name.len() >= 3{
+        if let Some(last_char) = name.chars().last(){
+            if !last_char.is_numeric(){
+                return true;
+            }
+        }
+    }
+    // If anything before didn't worked, then probably it's not a block device.
+    return false;
 }
 
 /// Detect the devices of the current running system and returns them into a Vec<String>
@@ -95,8 +106,7 @@ fn detect_devices() -> Vec<String>{
             if let Ok(disk_name) = disk.file_name().into_string(){
             /* If there is any sd device or nvme device and it is not a partition, the program will
              add the /dev/{device} to the 'disks' vector.*/
-                if (disk_name.starts_with("sd") && disk_name.len() > 3) || 
-                (disk_name.starts_with("nvme") && !disk_name.contains("p")){
+                if it_is_block_device(&disk_name){    
                     disks.push(format!("/dev/{}",disk_name))
                 }
             } else{
