@@ -20,7 +20,7 @@ fn main() -> Status {
     // Find the boot entries in the ESP partition
     find_boot::find_boot_entry();
     // Parse the config file to get the global configuration working 
-    configuration::spark_config(); 
+    configuration::load_config(); 
     // Function that should show the boot entries of the ESP partition
     configuration::boot_entries();
     // Function to load the kernel from the ESP partition

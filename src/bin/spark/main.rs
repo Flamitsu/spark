@@ -25,7 +25,7 @@ fn main() {
         "help" => cli::show_help(),
         "clean" => commands::clean::clean_entries(),
         "update" => commands::update::update_entries(),
-        "test" => { nvram::read::read_nvram();}, // Test parameter designed to try the WIP func.
+        "test" => { nvram::read::read_nvram_variables();}, // Test parameter designed to try the WIP func.
         // If the user says something that the program can't understand, then:
         _ => {
             eprintln!("Unknown argument: {}", argument[1]);

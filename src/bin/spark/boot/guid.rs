@@ -2,7 +2,7 @@ use std::fs::{self, File};
 use std::io::{Seek, SeekFrom, Read};
 use std::process::exit;
 /// Read the GUID little endian (LE) and big endian (BE) bytes to see if the device contains an ESP partition 
-pub fn esp_guid_partition() -> Option<String>{
+pub fn get_esp_partition() -> Option<String>{
     // The disks aviables inside the system. 
     let disks = detect_devices();
     /*

@@ -1,6 +1,6 @@
 use std::fs::{self,create_dir_all,remove_dir_all,copy};
 use crate::utils::exists;
-use crate::boot::guid::esp_guid_partition;
+use crate::boot::guid::get_esp_partition;
 use std::process::exit;
 /// Dir operations such as deleting or creating directories
 pub enum Operations{
@@ -8,11 +8,11 @@ pub enum Operations{
     Delete
 }
 
-/// This function detects the mount point of the ESP partition.  
+/// This function detects the mount point of the ESP partition.
 fn esp_mountpoint() -> Option<String>{ // It returns the string with the final installation route of the ESP 
     let mounts = fs::read_to_string("/proc/self/mounts") // Opens the /proc/self/mounts file 
         .expect("Could not read '/proc/self/mounts'"); // If it can't find the mounts file the program says this 
-    let esp_partition = match esp_guid_partition(){
+    let esp_partition = match get_esp_partition(){
         Some(partition) => partition,
         None => {
             eprintln!("There is no ESP in the system.");
@@ -65,9 +65,10 @@ pub fn dir_operations(operations: Operations,route: Option<String>){
                          * The final file name depends on if the directory of destination is
                          * /efi/boot or /efi/spark . 
                          */
-                        let file_name = if dir == "/EFI/BOOT"
-                        {"BOOTX64.efi"} else 
-                        {"sparkx64.efi"};
+                        let file_name = if dir == "/EFI/BOOT"{
+                            "BOOTX64.efi"
+                        } 
+                        else {"sparkx64.efi"};
                         let destination = format!("{}/{}",full_route,file_name);
                         if let Err(error) = copy(&source_efi, &destination){
                             eprintln!("Error when trying to copy the binary {} to {}: {}",source_efi,destination,error);

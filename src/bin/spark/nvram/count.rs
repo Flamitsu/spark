@@ -40,7 +40,7 @@ pub fn count_entries() -> u16{
 /// Validates the entry and returns true if it is valide
 fn validate_entry(entry: &str, uefi_uid: &str, boot_str : &str ) -> bool{
     // If the entry starts with the parameter, matches de length and ends with the uefi_uid...
-    if (entry.starts_with(&boot_str)) && ((entry.len() == 45)) && entry.ends_with(&uefi_uid){
+    if (entry.starts_with(&boot_str)) && (entry.len() == 45) && entry.ends_with(&uefi_uid){
         return true;
     };
     return false;
