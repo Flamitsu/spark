@@ -1,4 +1,5 @@
 use std::fs;
+use std::process::exit;
 pub fn count_entries() -> u16{
     // The standard boot entry in the NVRAM's variable starts with "Boot"
     let boot_str:&str = "Boot0";
@@ -9,7 +10,7 @@ pub fn count_entries() -> u16{
         operation_result
     } else{
         eprintln!("Error while reading the NVRAM variables. Check if you have enough privileges.");
-        return 0;
+        exit(5);
     };
     
     /*
@@ -29,11 +30,18 @@ pub fn count_entries() -> u16{
             
             // This converts the name of the file to UTF-8 string.
             let file_name = file_name.to_string_lossy();
-            
-            if file_name.starts_with(&boot_str) && file_name.contains(&uefi_uid){
+            if validate_entry(&file_name, &uefi_uid, &boot_str){
                 counting = counting + 1;
             }
         }
     }
     return counting;
+}
+/// Validates the entry and returns true if it is valide
+fn validate_entry(entry: &str, uefi_uid: &str, boot_str : &str ) -> bool{
+    // If the entry starts with the parameter, matches de length and ends with the uefi_uid...
+    if (entry.starts_with(&boot_str)) && ((entry.len() == 45)) && entry.ends_with(&uefi_uid){
+        return true;
+    };
+    return false;
 }
