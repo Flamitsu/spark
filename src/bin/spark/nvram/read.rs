@@ -1,6 +1,6 @@
 use std::fs;
 use std::process::exit;
-pub fn read_nvram_variables(){
+pub fn _read_nvram_variables(){
     let route: &str = "/sys/firmware/efi/efivars";
     let _nvram_dir = if let Ok(directories) = fs::read_dir(&route){        
         directories

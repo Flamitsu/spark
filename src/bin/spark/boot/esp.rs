@@ -25,7 +25,7 @@ fn esp_mountpoint() -> Option<String>{ // It returns the string with the final i
             let device = mount[0];
             let mount_route = mount[1];
             let file_system = mount[2];
-            if (&device == &esp_partition) && (file_system == "VFAT"){
+            if (&device == &esp_partition) && (file_system == "vfat"){
                 return Some(mount_route.to_string())
             }
         }

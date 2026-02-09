@@ -5,6 +5,8 @@ mod cli;
 mod commands;
 mod boot;
 mod nvram;
+mod os;
+use os::GetDistroInfo;
 // This is the main code flow for the general spark binary
 fn main() {
     // This catchs the user input
@@ -25,7 +27,7 @@ fn main() {
         "help" => cli::show_help(),
         "clean" => commands::clean::clean_entries(),
         "update" => commands::update::update_entries(),
-        "test" => { nvram::read::read_nvram_variables();}, // Test parameter designed to try the WIP func.
+        "test" => {println!("{}", os::get_distro_information(GetDistroInfo::Id));}, // Test parameter designed to try the WIP func.
         // If the user says something that the program can't understand, then:
         _ => {
             eprintln!("Unknown argument: {}", argument[1]);
