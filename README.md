@@ -1,6 +1,6 @@
 # Spark
-## Alpha stage
-**BIG DISCLAIMER** - **Spark** is an **ALPHA STAGE boot manager** written in Rust, **IT IS NOT MEANT TO BE USED IN PRODUCTION AT THIS MOMENT**.
+## Pre alpha stage
+**BIG DISCLAIMER** - **Spark** is a **PRE ALPHA STAGE boot manager** written in Rust, **IT IS NOT MEANT TO BE USED IN PRODUCTION AT THIS MOMENT**.
 ## Table of contents
 - [Description](#description)
 - [Features](#features)
@@ -47,11 +47,11 @@
 - [ ] Customization of the general config file
 ## Requirements
 - UEFI firmware
+- GPT partition table
 - Rustup configured
 - x86_64 architecture
 - QEMU installed and configured with a Linux OS instance
 - QEMU virtual snapshot of the virtual machine before executing the software
-- FAT32 file system mounted in either `/boot`,`/boot/efi` or `/efi`
 ## Installation
 Make sure you have the [rustup](https://rust-lang.org/tools/install/) toolchain before trying to build the binary.
 

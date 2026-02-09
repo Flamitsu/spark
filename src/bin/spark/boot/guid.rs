@@ -14,7 +14,7 @@ pub fn get_esp_partition() -> Option<String>{
         0x28, 0x73, 0x2A, 0xC1, // (LE) DATASET1 -> 28 73 2A C1 -> C12A7328 
         0x1F, 0xF8, // (LE) DATASET2 -> 1F F8 -> 1FF8
         0xD2, 0x11, // (LE) DATASET3 -> 11 D2 -> D211
-        0xBA, 0x4B, // (LE) DATASET4 -> BA 4B -> BA4B
+        0xBA, 0x4B, // (BE) DATASET4 -> BA 4B -> BA4B
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
     ];
     for disk_path in disks{
@@ -65,11 +65,6 @@ pub fn get_esp_partition() -> Option<String>{
         }
     };
     return None;
-}
-
-// Function still WIP 
-fn _entries_start_lba(){
-    todo!("This function should get the LBA2 starting position instead of assume 1024 byte offset");
 }
 
 /// Function to see if the argument is a disk or not. 

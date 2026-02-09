@@ -32,7 +32,7 @@ pub fn show_help() {
     );
 }
 
-/// This function gets an specific flag in the binary execution, and gets sliced to get the .efi binary   
+/// This function gets an specific flag in the binary execution, and gets sliced to get the .efi binary 
 pub fn get_efi_bin_path(args: &[String]) -> Option<String>{
     // Define the valid flag in the execution of the binary 
     let flag = "--efi-bin="; 
