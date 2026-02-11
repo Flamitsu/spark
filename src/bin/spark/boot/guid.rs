@@ -36,11 +36,13 @@ pub fn get_esp_partition() -> Option<String>{
         for partition_number in 1..=128{
             // Creates a buffer to read the GUID
             let mut buffer = [0u8;16];
+            
             // Reads the buffer and if there is an error skips to the next disk.
             if let Err(error) = disk.read_exact(&mut buffer){
                 eprintln!("Can not read bytes from {} : {}", disk_path,error);
                 break;
             };
+            
             // If the disk has a ESP partition, then, the disk is returned.
             if buffer == ESP_GUID_BYTES{
                 if disk_path.contains("sd"){
@@ -57,6 +59,7 @@ pub fn get_esp_partition() -> Option<String>{
             if buffer == [0u8;16]{
                 break;
             };
+            
             // Moves the cursor 112 bytes ahead. If there is an error, skips to the next disk.
             if let Err(error) = disk.seek(SeekFrom::Current(112)){
                 eprintln!("Error. Can not move the disk pointer inside the LBA2 sector. {}",error);

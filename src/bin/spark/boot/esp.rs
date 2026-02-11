@@ -55,37 +55,51 @@ pub fn dir_operations(operations: Operations,route: Option<String>){
         let full_route = format!("{}{}",esp,dir);
         match operations {
             Operations::Create => {
+                // First, it creates the dir
                 if let Err(error) = create_dir_all(&full_route){
                     eprintln!("Error creating {}: {}",full_route,error);
                 };
-                if dir == "/EFI/BOOT" || dir == "/EFI/spark"{
-                    // 
-                    if let Some(source_efi) = route.as_ref(){
-                        /*
-                         * The final file name depends on if the directory of destination is
-                         * /efi/boot or /efi/spark . 
-                         */
-                        let file_name = if dir == "/EFI/BOOT"{
-                            "BOOTX64.efi"
-                        } 
-                        else {"sparkx64.efi"};
-                        let destination = format!("{}/{}",full_route,file_name);
-                        if let Err(error) = copy(&source_efi, &destination){
-                            eprintln!("Error when trying to copy the binary {} to {}: {}",source_efi,destination,error);
-                        } else{
-                            println!("EFI binary copied correctly to: {}",destination)
-                        }
-                    }
+                /*If the dir is not either one directory that contains an .efi binary, then it
+                * will skip it.*/
+                if dir != "/EFI/BOOT" || dir != "/EFI/spark"{
+                    continue
+                };
+                // unpacks the option value 
+                let source_efi = match route.as_ref(){
+                    Some(source) => source,
+                    None => continue
+                };
+                /* Defines the file name.
+                *  If it is /EFI/BOOT it will define it as "BOOTX64.efi" because its the default
+                *  fallback that UEFI have*/
+                let file_name = if dir == "/EFI/BOOT"{
+                    "BOOTX64.efi"
+                } else{
+                    "sparkx64.efi"
+                };
+                
+                // Full destination of the efi binary
+                let destination = format!("{}/{}",full_route,file_name);
+                
+                // If the BOOTX64.efi is already in the ESP, do not replace it.
+                if file_name == "BOOTX64.efi" && exists(Some(&destination)){
+                    continue
+                };
+
+                // Copies the efi binary to the final destination
+                if let Err(error) = copy(source_efi, &destination){
+                    eprintln!("Error copying {} to {} : {}",file_name,destination,error);
                 }
             },
             // To delete directories, first is needed to know if the directory actually exists or not
             Operations::Delete => {
-                if exists(Some(&full_route)){
-                    if let Err(error) = remove_dir_all(&full_route){
-                        eprintln!("Error removing {}: {}",full_route,error);
-                    }
+                if !exists(Some(&full_route)){
+                    continue;    
+                } 
+                if let Err(error) = remove_dir_all(&full_route){
+                    eprintln!("Error removing {}: {}",full_route,error);
                 }
             }
-        }
-    }
+        } // End of the match 
+    } // end of the for 
 }
