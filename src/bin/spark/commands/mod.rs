@@ -1,4 +1,3 @@
-pub mod clean;
 pub mod install;
+pub mod help;
 pub mod remove;
-pub mod update;
