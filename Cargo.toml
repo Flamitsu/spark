@@ -4,6 +4,9 @@ version = "0.1.0" # Version of the project
 edition = "2024"
 description = "Bootloader made purely in rust. Supports only UEFI. Designed for those who wants stability in their bootloader." # Description of the program
 
+[dependencies]
+bitflags = "2.11.0"
+
 [dependencies.uefi] 
 package = "uefi"
 version = "0.36.1"

@@ -1,3 +1,3 @@
-pub fn install_spark(){
+pub fn _install_spark(){
     todo!("This should install the binary.")
 }
