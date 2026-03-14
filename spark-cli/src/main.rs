@@ -22,13 +22,13 @@ fn run() -> Result<(), SparkError> {
         commands::help::show_help();
         return Ok(());
     }
-    
-    let skip_confirmation: bool = cli::skip_user_confirmation(&args);
+    // This will skip the confirmation prompt (Use the -y or --yes flag to skip it.)
+    let force: bool = cli::skip_user_confirmation(&args);
     
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
-        "install" => commands::install::install_spark(&args,skip_confirmation)?,
-        "remove" => commands::remove::remove_spark_installation(skip_confirmation)?,
+        "install" => commands::install::install_spark(&args, force)?,
+        "remove" => commands::remove::remove_spark_installation(force)?,
         "update" => commands::update::update_entries()?,
         "check" => todo!("This command should check the configs and the kernels"),
         "list" => todo!("This command should list all the aviable kernels configured"),
