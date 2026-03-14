@@ -19,7 +19,7 @@
 - Stable
 - Maintainable and modular
 ## TODO
-### TODO (general binary):
+### TODO (spark-cli):
 - [X] ESP automatic detection
 
 - [X] Installation process and removal
@@ -33,10 +33,10 @@
 - [ ] Generating operating system entries
 
 - [ ] Supporting custom signatures of the binary
-### TODO (UEFI binary):
+### TODO (spark-loader):
 - [X] Detect user input
 
-- [ ] Booting any kernel an initramfs
+- [ ] Booting any kernel with the initramfs
 
 - [ ] Supporting firmware signatures
 
@@ -62,15 +62,24 @@ cd spark
 cargo loader # This command builds the binary for the .efi bin.
 cargo cli # This command builds the general binary.
 ```
-However, `cargo loader` may produce an error. If that happens, it may be that you don't have the toolchain installed. 
-To proceed execute: `rustup target add x86_64-unknown-uefi` and re-run: `cargo loader` command.
+However, `cargo loader` may produce an error. If that happens, it may be that you don't have the toolchain installed. To install the proper target you need to execute this code:
+```bash
+cd scripts/
+./install-targets.sh 
+```
 ## Execution
 ### Disclaimer
 > This code is still work in progress and it is not meant to be executed in the host machine in any way. You should have a QEMU snapshot (or the software you are using to virtualize an environment) and then execute the software.
 
-To execute the binary, it is **extremely recommended** to be inside a **virtual machine**.
+If you only want to try the UEFI binary, you need to execute this commands:
+```bash
+cd scripts/
+./only-loader.sh
+```
 
-After the installation process is complete, you need to run the following command: `./execute.sh`, reboot the virtual machine and it should boot the EFI binary.
+To execute the spark-cli or spark-loader binary as a whole, it is **extremely recommended** to be inside a **virtual machine**.
+
+After the installation process is complete, you need to run the following command: `./tyr-virtual-machine.sh`, and it should be only executed inside a virtual machine. 
 
 ## Contribution
 To contribute to this project you should look at the [contributing guidelines](https://github.com/Flamitsu/spark/blob/main/CONTRIBUTING.md) first.
