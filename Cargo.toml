@@ -1,27 +1,15 @@
-[package]
-name = "spark" # Name of the project
-version = "0.1.0" # Version of the project
+# Different targets so I decided to split it in 2 different packages
+[workspace]
+members = [
+  "spark-cli",
+  "spark-loader"
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
 edition = "2024"
-description = "Bootloader made purely in rust. Supports only UEFI. Designed for those who wants stability in their bootloader." # Description of the program
-
-[dependencies.uefi] 
-package = "uefi"
-version = "0.36.1"
-optional = true
-features = ["default", "alloc", "global_allocator", "panic_handler"]
-
-[[bin]] # The bin of the bootmanager code path
-name = "sparkx64"
-path = "src/bin/spark-uefi/main.rs"
-
-[[bin]] # The bin of the general binary path
-name = "spark"
-path = "src/bin/spark/main.rs"
-
-
-[features]
-sparkx64 = ["uefi"] # The only using the uefi crate is the sparkx64 binary
-spark = []
+license = "MIT OR Apache-2.0"
 
 [profile.dev]
 panic = "abort"

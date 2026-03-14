@@ -1,0 +1,13 @@
+[package]
+name = "spark-loader"
+version.workspace = true
+edition.workspace = true
+description = "Bootloader core made purely in Rust."
+license.workspace = true
+
+[[bin]]
+name = "sparkx64"
+path = "src/main.rs"
+
+[dependencies]
+uefi = { version = "0.36.1", features = ["default", "alloc", "global_allocator", "panic_handler"] }

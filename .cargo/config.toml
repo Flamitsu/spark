@@ -1,5 +1,0 @@
-[alias] 
-# Build the sparkx64.efi binary 
-build-uefi = "build --bin sparkx64 --features sparkx64 --target x86_64-unknown-uefi" 
-# Build the spark binary 
-build-normal = "build --bin spark --features spark --target x86_64-unknown-linux-musl"

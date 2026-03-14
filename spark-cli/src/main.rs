@@ -28,8 +28,10 @@ fn run() -> Result<(), SparkError> {
             let efi_bin_path: &Path = cli::get_efi_bin_path(&args)?;
             commands::install::install_spark(efi_bin_path, skip_confirmation)?
         },
-        "remove" => commands::remove::remove_spark_installation()?,
+        "remove" => commands::remove::remove_spark_installation(skip_confirmation)?,
         "update" => commands::update::update_entries()?,
+        "check" => todo!("things"),
+        "list" => todo!("other_things"),
         "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
         "test" => commands::help::show_help(), // This option is for WIP options. Do not execute.

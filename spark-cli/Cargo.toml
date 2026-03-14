@@ -1,0 +1,12 @@
+[package]
+name = "spark-cli"
+version.workspace = true
+edition.workspace = true
+description = "Managment tool for configure and install the Spark bootloader."
+license.workspace = true
+
+[[bin]]
+name = "spark"
+path = "src/main.rs"
+
+[dependencies]
