@@ -12,6 +12,7 @@ pub fn manage_esp_structure(operation: Operations, efi_binary_route: &Path) -> R
     Ok(())
 }
 /// This function returns the mountpoint provided by compatible_esp_device function.
-pub fn _search_current_mountpoint(){
-
+#[allow(unused)]
+pub fn get_esp_mountpoint() -> Result<(), SparkError>{
+    Ok(())
 }

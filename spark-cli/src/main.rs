@@ -34,7 +34,7 @@ fn run() -> Result<(), SparkError> {
         "list" => todo!("This command should list all the aviable kernels configured"),
         "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
-        "test" => println!("This option is for WIP options."), // This option is for WIP options. Do not execute.
+        "test" => boot::gpt::get_disks()?, // This option is for WIP options. Do not execute.
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }
     Ok(())

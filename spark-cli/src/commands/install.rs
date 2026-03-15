@@ -15,7 +15,7 @@ pub fn install_spark(args: &[String], force_install: bool) -> Result<(), SparkEr
 
     // Aborts the program immediately 
     if !continue_program{
-        return Err(cmd::Error::UserAborted)?;
+        Err(cmd::Error::UserAborted)?;
     }
 
     Ok(())
