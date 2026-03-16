@@ -1,6 +1,7 @@
 pub mod cmd;
 pub mod nvram;
 pub mod io;
+use core::num::ParseIntError;
 #[derive(Debug)]
 pub enum SparkError {
     Cmd(cmd::Error),
@@ -41,5 +42,13 @@ impl From<std::io::Error> for SparkError {
 impl From<io::Error> for SparkError {
     fn from(err: io::Error) -> Self {
         Self::Io(err)
+    }
+}
+
+impl From<ParseIntError> for SparkError {
+    fn from(err: ParseIntError) -> Self {
+        // Usamos la conversión que ya creamos en el paso anterior en io.rs
+        // y luego lo envolvemos en la variante Io de SparkError
+        Self::Io(io::Error::from(err))
     }
 }
