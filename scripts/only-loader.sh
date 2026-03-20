@@ -12,7 +12,7 @@ fi
 # Will try to build the binary
 cargo loader || { echo "You may need to run the 'install-targets.sh' script in this directory."; exit 1; }
 # Will try to copy the recently compiled binary
-cp ../target/x86_64-unknown-uefi/debug/sparkx64.efi "$BOOT_DIR/esp/efi/boot/bootx64.efi"
+cp ../target/x86_64-unknown-uefi/debug/ignixx64.efi "$BOOT_DIR/esp/efi/boot/bootx64.efi"
 
 # Will try to run the script. 
 (

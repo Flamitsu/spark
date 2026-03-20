@@ -3,13 +3,13 @@ pub mod nvram;
 pub mod io;
 use core::num::ParseIntError;
 #[derive(Debug)]
-pub enum SparkError {
+pub enum IgnixError {
     Cmd(cmd::Error),
     Nvram(nvram::Error),
     Io(io::Error),
 }
 
-impl std::fmt::Display for SparkError {
+impl std::fmt::Display for IgnixError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Cmd(e) => write!(f, "{}", e),
@@ -19,36 +19,34 @@ impl std::fmt::Display for SparkError {
     }
 }
 
-impl std::error::Error for SparkError {}
+impl std::error::Error for IgnixError {}
 // Conversions from a type of error to another (keeps compatibility)
-impl From<cmd::Error> for SparkError {
+impl From<cmd::Error> for IgnixError {
     fn from(err: cmd::Error) -> Self {
         Self::Cmd(err)
     }
 }
 
-impl From<nvram::Error> for SparkError {
+impl From<nvram::Error> for IgnixError {
     fn from(err: nvram::Error) -> Self {
         Self::Nvram(err)
     }
 }
-// Converts from std::io::Error to SparkError 
-impl From<std::io::Error> for SparkError {
+// Converts from std::io::Error to IgnixError 
+impl From<std::io::Error> for IgnixError {
     fn from(err: std::io::Error) -> Self {
         Self::Io(io::Error::from(err))
     }
 }
-// This packages the result to SparkError::Io
-impl From<io::Error> for SparkError {
+// This packages the result to IgnixError::Io
+impl From<io::Error> for IgnixError {
     fn from(err: io::Error) -> Self {
         Self::Io(err)
     }
 }
 
-impl From<ParseIntError> for SparkError {
+impl From<ParseIntError> for IgnixError {
     fn from(err: ParseIntError) -> Self {
-        // Usamos la conversión que ya creamos en el paso anterior en io.rs
-        // y luego lo envolvemos en la variante Io de SparkError
         Self::Io(io::Error::from(err))
     }
 }

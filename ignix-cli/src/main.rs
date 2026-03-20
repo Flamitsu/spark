@@ -3,7 +3,7 @@ mod cli;
 mod commands;
 mod errors;
 use std::env;
-use errors::SparkError;
+use crate::errors::IgnixError;
 use crate::errors::cmd;
 fn main(){
     // This if runs the actual program, if there is any error, it will exit it.
@@ -14,7 +14,7 @@ fn main(){
 }
 
 /// The run function is the one that runs the program. If there is some problem it will tell it to the main function and the main function will exit the program with a message.
-fn run() -> Result<(), SparkError> {
+fn run() -> Result<(), IgnixError> {
     let args: Vec<String> = env::args().collect();
     
     // If there is not any argument, it will show the help.
@@ -34,7 +34,7 @@ fn run() -> Result<(), SparkError> {
         "list" => todo!("This command should list all the aviable kernels configured"),
         "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
-        "test" => {boot::gpt::compatible_esp_device()?;}, // This option is for WIP options. Do not execute.
+        "test" => {println!("{}",boot::gpt::compatible_esp_partition()?);}, // This option is for WIP options. Do not execute.
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }
     Ok(())

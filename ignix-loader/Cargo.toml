@@ -2,11 +2,11 @@
 name = "spark-loader"
 version.workspace = true
 edition.workspace = true
-description = "Bootloader core made purely in Rust."
+description = "Boot loader core made purely in Rust to ensure stability and speed."
 license.workspace = true
 
 [[bin]]
-name = "sparkx64"
+name = "ignixx64"
 path = "src/main.rs"
 
 [dependencies]

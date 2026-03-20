@@ -6,6 +6,6 @@ git pull || { echo "Git pull failed. You may need to install git before executin
 cd ..
 cargo cli && cargo loader;
 cd target/debug/
-doas ./spark install --efi-bin=../x86_64-unknown-uefi/debug/sparkx64.efi || sudo ./spark install --efi-bin=../x86_64-unknown-uefi/debug/sparkx64.efi
+doas ./ignix install --efi-bin=../x86_64-unknown-uefi/debug/ignixx64.efi || sudo ./ignix install --efi-bin=../x86_64-unknown-uefi/debug/ignixx64.efi
 reboot || doas reboot
 

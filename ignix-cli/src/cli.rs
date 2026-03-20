@@ -5,7 +5,7 @@ use std::path::Path;
 /// Extracts the EFI binary path in the argument that have been provided and the default one.
 pub fn get_efi_bin_path(arguments: &[String]) -> Result<&Path, cmd::Error>{ 
     
-    const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/spark/sparkx64.efi";
+    const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/ignix/ignixx64.efi";
     const EFI_BIN_PATH_FLAG: &str = "--efi-bin=";
     
     for argument in arguments{

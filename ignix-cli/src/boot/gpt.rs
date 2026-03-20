@@ -1,11 +1,11 @@
 // This archive is used to know which device is the correct for the installation of the ESP
-use crate::errors::SparkError;
+use crate::errors::IgnixError;
 use std::fs::read_dir;
 use std::fs::File;
 use std::io::{Seek,SeekFrom,Read};
-
-/// Returns the actual ESP device, so the esp.rs module can discover its path.
-pub fn compatible_esp_device() -> Result<String, SparkError>{
+use crate::errors::cmd;
+/// Returns the actual ESP partition, so the esp.rs module can discover its path.
+pub fn compatible_esp_partition() -> Result<String, IgnixError>{
     const BLOCK_DEV_ROUTE: &str = "/sys/block/";
     const LOGICAL_BLOCK: &str = "/queue/logical_block_size";
     let aviable_disks = get_disks(BLOCK_DEV_ROUTE)?;
@@ -23,14 +23,19 @@ pub fn compatible_esp_device() -> Result<String, SparkError>{
             eprintln!("Warning: the disk {} may not be a valid GPT. Skipping...",dev_route_disk);
             continue
         }
-
+        let uefi_partition_number = find_uefi_partition(block_size, &open_disk)?;
+        /* Unpacks the number, if there is a number it will return it as a valid disk, if not, it
+         * will skip to the next disk in the iteration.*/ 
+        match uefi_partition_number{
+            Some(number) => {return build_partition_name(&disk, number)},
+            None => continue
+        }
     }
-    
-    Ok(String::new())
+    Err(cmd::Error::NotEFIPartitionFound)?
 }
 
 /// Returns a list of the disks in the system (block ones).
-fn get_disks(block_route: &str) -> Result<Vec<String>, SparkError>{
+fn get_disks(block_route: &str) -> Result<Vec<String>, IgnixError>{
     // Creates a new empty vec where the found disk devices are going to be storaged
     let mut disks:Vec<String> = Vec::new();
     // Creates an empty vec to storage the disks
@@ -48,7 +53,7 @@ fn get_disks(block_route: &str) -> Result<Vec<String>, SparkError>{
         };
         
         // Checks if it is a valid block device, like for example 'nvmeXnY', not partitions.
-        if check_valid_block_name(&disk_name){
+        if is_valid_block_name(&disk_name){
             disks.push(disk_name);
         }
     }
@@ -56,7 +61,7 @@ fn get_disks(block_route: &str) -> Result<Vec<String>, SparkError>{
 }
 
 /// Checks if the provided name is valid or not. (Example: sda, nvme... Bad example: dm-0,sda1...) 
-fn check_valid_block_name(device_name: &str) -> bool {
+fn is_valid_block_name(device_name: &str) -> bool {
     // If the device is a block device and not a partition then return true 
     if device_name.starts_with("nvme") && !device_name.contains("p"){
         return true
@@ -71,9 +76,16 @@ fn check_valid_block_name(device_name: &str) -> bool {
     false
 }
 
+fn build_partition_name(disk_name: &str, partition_number: u8) -> Result<String, IgnixError>{
+    if disk_name.starts_with("nvme"){
+        return Ok(format!("{}p{}",disk_name,partition_number))
+    }
+    Ok(format!("{}{}",disk_name,partition_number))
+}
+
 /// Get disk logical sector size (Example: 512, 4096...)
 fn get_disk_logical_sector_size(disk_block: &str, block_route: &str, 
-    logical_block_route: &str) -> Result<u64, SparkError>{
+    logical_block_route: &str) -> Result<u64, IgnixError>{
     
     // The route where the logical block sector size is storaged in
     let complete_route = format!("{}{}{}",block_route,disk_block,logical_block_route);
@@ -84,7 +96,7 @@ fn get_disk_logical_sector_size(disk_block: &str, block_route: &str,
 }
 
 /// Gets the proper bytes from the disk to know if it is a good GPT and have LBA1 sign "EFI PART" 
-fn try_gpt_sectors(logical_block_size: u64, mut open_disk: &File) -> Result<bool, SparkError>{
+fn try_gpt_sectors(logical_block_size: u64, mut open_disk: &File) -> Result<bool, IgnixError>{
     
     // The EFI part signature. "EFI PART" in ascii, (This is in raw bytes) 
     const EFI_PART_SIGN: [u8;8] = [0x45, 0x46, 0x49, 0x20, 0x50, 0x41, 0x52, 0x54];
@@ -102,9 +114,8 @@ fn try_gpt_sectors(logical_block_size: u64, mut open_disk: &File) -> Result<bool
     Ok(false)
 }
 
-#[allow(unused)]
 /// Checks and compare the partition type GUID and returns the partition number 
-fn find_uefi_guid(logical_block_size: u64, mut open_disk:&File) -> Result<Option<u8>, SparkError>{ 
+fn find_uefi_partition(logical_block_size:u64,mut open_disk:&File) -> Result<Option<u8>, IgnixError>{ 
     // This number represent where the partitions info begin. (LBA2)
     const LBA: u64 = 2;
     // Maximum partition for device in GPT
@@ -122,6 +133,7 @@ fn find_uefi_guid(logical_block_size: u64, mut open_disk:&File) -> Result<Option
         0xBA, 0x4B, // (BE) DATASET4 -> BA 4B -> BA4B
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
     ];
+
     let offset: u64 = logical_block_size * LBA;
     // This counter will go up every partition sector that isn't empty.
     let mut partitions = 0;
@@ -131,7 +143,7 @@ fn find_uefi_guid(logical_block_size: u64, mut open_disk:&File) -> Result<Option
         open_disk.read_exact(&mut buffer)?;
         // If the partition sign isn't empty then its a partition. 
         if buffer != [0u8;16]{
-            partitions = partitions + 1;
+            partitions += 1;
         }
         // If the buffer matches the sign, then it is an ESP valid partition.
         if buffer == ESP_GUID_BYTES{

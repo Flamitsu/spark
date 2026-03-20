@@ -1,12 +1,12 @@
 [package]
-name = "spark-cli"
+name = "ignix-cli"
 version.workspace = true
 edition.workspace = true
-description = "Managment tool for configure and install the Spark bootloader."
+description = "Managment tool for configure and install the Ignix bootloader."
 license.workspace = true
 
 [[bin]]
-name = "spark"
+name = "ignix"
 path = "src/main.rs"
 
 [dependencies]

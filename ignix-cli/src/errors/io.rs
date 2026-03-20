@@ -11,7 +11,7 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::PermissionDenied => write!(f, "Access denied. Please run spark with higher privileges."),
+            Self::PermissionDenied => write!(f, "Access denied. Please run Ignix with higher privileges."),
             Self::NotFound(path) => write!(f, "The system could not find the specified path: {}", path),
             Self::InvalidFormat(e) => write!(f, "Data format error: {}",e),
             Self::Unknown(e) => write!(f, "An unexpected system error occurred: {}", e),
@@ -30,7 +30,7 @@ impl From<io::Error> for Error {
         }
     }
 }
-// Converts the raw ParseIntError to the SparkError (used in the module gpt.rs and others). 
+// Converts the raw ParseIntError to the IgnixError (used in the module gpt.rs and others). 
 impl From<ParseIntError> for Error {
     fn from(err: ParseIntError) -> Self {
         Self::InvalidFormat(err.to_string())

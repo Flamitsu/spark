@@ -1,5 +1,5 @@
 [alias]
-cli = "build -p spark-cli"
-loader = "build -p spark-loader --target x86_64-unknown-uefi"
+cli = "build -p ignix-cli"
+loader = "build -p ignix-loader --target x86_64-unknown-uefi"
 [target.x86_64-unknown-uefi]
 linker = "lld"

@@ -1,8 +1,8 @@
 # Different targets so I decided to split it in 2 different packages
 [workspace]
 members = [
-  "spark-cli",
-  "spark-loader"
+  "ignix-cli",
+  "ignix-loader"
 ]
 resolver = "2"
 
