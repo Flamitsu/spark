@@ -12,7 +12,17 @@ pub const BLOCK_DEV_ROUTE: &str = "/sys/block/";
 /// Defines the route like '/sys/block/{device}/queue/logical_block_size' 
 pub const LOGICAL_BLOCK: &str = "/queue/logical_block_size";
 
-// Neccesary for the confirmation flags in the CLI usage of the tool while the install process. 
+/// Neccesary for the confirmation flags in the CLI usage of the tool while the install process. 
 pub const SHORT_CONFIRMATION_FLAG: &str = "-y";
+
+/// Neccesary for the confirmation flags in the CLI usage of the tool while the install process.
 pub const LONG_CONFIRMATION_FLAG: &str = "--yes";
 
+/// Flag to allow the program to install in a virtual device.
+pub const ALLOW_VIRTUAL_FLAG: &str = "--allow-virtual";
+
+/// Flag argument to remove the neccesary NVRAM write variable.
+pub const NO_NVRAM: &str = "--no-nvram";
+#[allow(unused)]
+/// Flag argument to say which route should the program be installed in.
+pub const INSTALL_ROUTE: &str = "--install-route=";

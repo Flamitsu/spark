@@ -1,7 +1,40 @@
-use crate::config::{DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH_FLAG, SHORT_CONFIRMATION_FLAG, LONG_CONFIRMATION_FLAG};
-use crate::errors::cmd;
+use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH_FLAG, NO_NVRAM};
+use crate::config::{SHORT_CONFIRMATION_FLAG, LONG_CONFIRMATION_FLAG};
+use crate::errors::{IgnixError, cmd};
 use std::io::{Write, stdin,stdout};
 use std::path::Path;
+
+#[allow(unused)]
+pub struct InstallOptions<'a> {
+    pub force: bool,
+    pub allow_virtual: bool,
+    pub no_nvram: bool,
+    pub efi_bin: &'a Path,
+    pub install_route: &'a Path,
+}
+
+pub struct RemoveOptions {
+    pub force: bool,
+}
+
+/// Asigns the values to the InstallOptions struct
+pub fn parse_install_args(args: &[String]) -> Result<InstallOptions <'_>, IgnixError>{
+    Ok(InstallOptions {
+        force: args.iter().any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG),
+        allow_virtual: args.iter().any(|a| a == ALLOW_VIRTUAL_FLAG),
+        no_nvram: args.iter().any(|a| a == NO_NVRAM),
+        efi_bin: get_efi_bin_path(args)?,
+        install_route: &Path::new("")
+    })
+}
+
+/// Asigns the values to the RemoveOptions struct
+pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
+    Ok(RemoveOptions {
+        force: args.iter().any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG)
+    })
+}
+
 /// Extracts the EFI binary path in the argument that have been provided and the default one.
 pub fn get_efi_bin_path(arguments: &[String]) -> Result<&Path, cmd::Error>{ 
     
@@ -37,20 +70,6 @@ pub fn get_efi_bin_path(arguments: &[String]) -> Result<&Path, cmd::Error>{
     Err(cmd::Error::EFINotFound(DEFAULT_EFI_BIN_PATH.to_string()))
 }
 
-/// This function provides an argument to skip the confirmation in the installation process of the program with the flag '-y' or '--yes'
-pub fn skip_user_confirmation(arguments: &[String]) -> bool{
-    
-    for argument in arguments{
-        
-        if argument.starts_with(SHORT_CONFIRMATION_FLAG) 
-            || argument.starts_with(LONG_CONFIRMATION_FLAG){
-            println!("Skipping confirmation");
-            return true;
-        }
-    }
-    false
-}
-
 /// This function ask user confirmation. If the user types 'YES' it returns true, if not, false.
 pub fn ask_user_confirmation(context: &str) -> bool{
     
@@ -75,18 +94,6 @@ pub fn ask_user_confirmation(context: &str) -> bool{
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn test_skip_user_confirmation(){
-        let args = vec!["ignix".to_string(), "--yes".to_string()];
-        assert!(skip_user_confirmation(&args));
-        let args_short = vec!["ignix".to_string(), "-y".to_string()];
-        assert!(skip_user_confirmation(&args_short));
-    }
-    #[test]
-    fn test_skip_user_confirmation_false(){
-        let args = vec!["ignix".to_string(), "install".to_string()];
-        assert!(!skip_user_confirmation(&args));
-    }
     #[test]
     fn test_get_efi_bin_path(){
         let args = vec![];

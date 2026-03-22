@@ -6,6 +6,7 @@ mod config; // Here is where all the consts resides centralized
 use std::env;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
+
 fn main(){
     // This if runs the actual program, if there is any error, it will exit it.
     if let Err(error) = run(){
@@ -23,13 +24,17 @@ fn run() -> Result<(), IgnixError> {
         commands::help::show_help();
         return Ok(());
     }
-    // This will skip the confirmation prompt (Use the -y or --yes flag to skip it.)
-    let force: bool = cli::skip_user_confirmation(&args);
     
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
-        "install" => commands::install::install_ignix(&args, force)?,
-        "remove" => commands::remove::remove_ignix_installation(force)?,
+        "install" => {
+            let options = cli::parse_install_args(&args)?;
+            commands::install::install_ignix(options)?
+        },
+        "remove" => {
+            let options = cli::parse_remove_args(&args)?;
+            commands::remove::remove_ignix_installation(options)?
+        },
         "update" => commands::update::update_entries()?,
         "check" => todo!("This command should check the configs and the kernels"),
         "list" => todo!("This command should list all the aviable kernels configured"),
