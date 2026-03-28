@@ -1,103 +1,108 @@
-use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH_FLAG, NO_NVRAM};
-use crate::config::{SHORT_CONFIRMATION_FLAG, LONG_CONFIRMATION_FLAG};
-use crate::errors::{IgnixError, cmd};
+use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH, INSTALL_ROUTE, LONG_CONFIRMATION_FLAG, NO_NVRAM, REMOVABLE_FLAG, SHORT_CONFIRMATION_FLAG};
+use crate::errors::{IgnixError, io, cmd};
 use std::io::{Write, stdin,stdout};
-use std::path::Path;
-
+use std::path::PathBuf;
 #[allow(unused)]
-pub struct InstallOptions<'a> {
+pub struct InstallOptions {
     pub force: bool,
     pub allow_virtual: bool,
     pub no_nvram: bool,
-    pub efi_bin: &'a Path,
-    pub install_route: &'a Path,
+    pub removable_device: bool,
+    pub efi_bin: PathBuf,
+    pub install_route: Option<PathBuf>,
 }
 
 pub struct RemoveOptions {
     pub force: bool,
 }
 
-/// Asigns the values to the InstallOptions struct
-pub fn parse_install_args(args: &[String]) -> Result<InstallOptions <'_>, IgnixError>{
+pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
+    
+    let mut force = false;
+    let mut allow_virtual = false;
+    let mut no_nvram = false;
+    let mut removable_device = false;
+    let mut install_route = None;
+    let mut efi_bin_provided = None;
+
+    for arg in args.iter().skip(2){
+        
+        match arg.as_str(){
+            SHORT_CONFIRMATION_FLAG | LONG_CONFIRMATION_FLAG => force = true,
+            ALLOW_VIRTUAL_FLAG => allow_virtual = true,
+            NO_NVRAM => no_nvram = true,
+            REMOVABLE_FLAG => removable_device = true,
+            _ => parse_prefixed_arg(arg, &mut install_route, &mut efi_bin_provided)?
+        }
+    } 
+
+    let efi_bin = match efi_bin_provided {
+        Some(path) => path,
+        None => is_valid_efi_bin_path(DEFAULT_EFI_BIN_PATH)?,
+    };
+
     Ok(InstallOptions {
-        force: args.iter().any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG),
-        allow_virtual: args.iter().any(|a| a == ALLOW_VIRTUAL_FLAG),
-        no_nvram: args.iter().any(|a| a == NO_NVRAM),
-        efi_bin: get_efi_bin_path(args)?,
-        install_route: &Path::new("")
+        force,
+        allow_virtual,
+        no_nvram,
+        removable_device,
+        efi_bin,
+        install_route
     })
 }
 
 /// Asigns the values to the RemoveOptions struct
 pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
     Ok(RemoveOptions {
-        force: args.iter().any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG)
+        force: args.iter()
+            .skip(2).any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG)
     })
 }
 
-/// Extracts the EFI binary path in the argument that have been provided and the default one.
-pub fn get_efi_bin_path(arguments: &[String]) -> Result<&Path, cmd::Error>{ 
-    
-    for argument in arguments{
-        
-        // Checks if the argument matches the flag, if not, continue to the next argument.
-        if !argument.starts_with(EFI_BIN_PATH_FLAG){
-            continue;
-        }
-        
-        // Defines the route and checks if it exists or ends with "efi".
-        let route = Path::new(&argument[EFI_BIN_PATH_FLAG.len()..]);
-        
-        /* Checks if the actual path's extension ends in .efi,
-         * if not, it will try to fall back to the default path of the .efi binary.
-        */
-        if route.extension().is_none_or(|ext| ext != ".efi") || !route.exists(){
-            eprintln!("The route '{}' is not a valid EFI binary. Check if the binary exists.",route.display());
-            eprintln!("Fallback to the default '{}' path",DEFAULT_EFI_BIN_PATH);
-            break;
-        }
-
-        return Ok(route);
-    }
-    
-    // Converts the string from the constant to a path type
-    let default_route = Path::new(DEFAULT_EFI_BIN_PATH);
-    
-    if default_route.exists(){
-        return Ok(default_route)
-    }
-    // If there is not any right path, neither default neither the given one, it will throw an error.
-    Err(cmd::Error::EFINotFound(DEFAULT_EFI_BIN_PATH.to_string()))
-}
-
-/// This function ask user confirmation. If the user types 'YES' it returns true, if not, false.
-pub fn ask_user_confirmation(context: &str) -> bool{
+pub fn ask_user_confirmation(context: &str) -> Result<bool, IgnixError>{
     
     println!("Remember to use capital letters as shown:");
     println!("Type 'YES' to {} or 'NO' to cancel.",context);
     
-    // Cleans the current stdout buffer 
     stdout().flush().ok();
-    let mut user_input = String::new();
-    stdin().read_line(&mut user_input).ok();
+
+    let mut lector = String::new();
+    stdin().read_line(&mut lector).ok();
     
-    match user_input.trim(){
-        "YES" => true,
-        "NO" => false,
+    match lector.trim(){
+        "YES" => Ok(true),
+        "NO" => Err(cmd::Error::UserAborted)?,
         _ => {
-            eprintln!("The program did not understoot the input '{}', assuming 'NO'.",user_input);
-            false
+            eprintln!("The program did not understoot the input '{}', assuming 'NO'.",lector);
+            Err(cmd::Error::UserAborted)?
         }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_get_efi_bin_path(){
-        let args = vec![];
-        let efi_path = get_efi_bin_path(&args);
-        assert!(efi_path.is_err() || efi_path.is_ok());
+fn parse_prefixed_arg( arg: &str, route: &mut Option<PathBuf>, efi: &mut Option<PathBuf>) 
+    -> Result<(), IgnixError> {
+    if let Some(path) = arg.strip_prefix(INSTALL_ROUTE) {
+        *route = Some(is_valid_install_path(path)?);
+    } else if let Some(path) = arg.strip_prefix(EFI_BIN_PATH) {
+        *efi = Some(is_valid_efi_bin_path(path)?);
+    } else {
+        Err(cmd::Error::InvalidArgument(arg.to_string()))?
     }
+    Ok(())
+}
+
+fn is_valid_efi_bin_path(route: &str) -> Result<PathBuf, IgnixError>{
+    let path = PathBuf::from(route);
+    if !path.exists() || path.extension().is_none_or(|ext| ext != "efi") {
+        Err(io::Error::NotFound(path.display().to_string()))?;
+    }
+    Ok(path)
+}
+
+fn is_valid_install_path(route: &str) -> Result<PathBuf, IgnixError>{
+    let path = PathBuf::from(route);
+    if path.exists(){
+        return Ok(path);
+    }
+    Err(io::Error::NotFound(path.display().to_string()))?
 }

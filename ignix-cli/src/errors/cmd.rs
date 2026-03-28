@@ -1,11 +1,13 @@
 #[derive(Debug)]
 /// Errors related to the bad usage of the ignix command. Like for example an invalid argument 
-pub enum Error{
+#[allow(unused)]
+pub enum Error {
     InvalidArgument(String),
     EFINotFound(String),
     UserAborted,
     NotEFIPartitionFound,
 }
+
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

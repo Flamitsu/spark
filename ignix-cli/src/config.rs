@@ -4,12 +4,13 @@
 pub const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/ignix/ignixx64.efi";
 
 /// This flag is what the user should put as an argument to give a distinct EFI bin path.
-pub const EFI_BIN_PATH_FLAG: &str = "--efi-bin=";
+pub const EFI_BIN_PATH: &str = "--efi-bin=";
 
 /// Defines the route that looks up the program to search for real block devices.
-pub const BLOCK_DEV_ROUTE: &str = "/sys/block/";
+pub const BLOCK_DEV_ROUTE: &str = "/sys/class/block/";
 
 /// Defines the route like '/sys/block/{device}/queue/logical_block_size' 
+#[allow(unused)]
 pub const LOGICAL_BLOCK: &str = "/queue/logical_block_size";
 
 /// Neccesary for the confirmation flags in the CLI usage of the tool while the install process. 
@@ -23,6 +24,9 @@ pub const ALLOW_VIRTUAL_FLAG: &str = "--allow-virtual";
 
 /// Flag argument to remove the neccesary NVRAM write variable.
 pub const NO_NVRAM: &str = "--no-nvram";
-#[allow(unused)]
+
 /// Flag argument to say which route should the program be installed in.
 pub const INSTALL_ROUTE: &str = "--install-route=";
+
+/// Flag argument to install the bootloader in a removable device.
+pub const REMOVABLE_FLAG: &str = "--removable";

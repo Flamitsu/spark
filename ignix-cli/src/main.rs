@@ -40,7 +40,6 @@ fn run() -> Result<(), IgnixError> {
         "list" => todo!("This command should list all the aviable kernels configured"),
         "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
-        "test" => {println!("{}",boot::gpt::compatible_esp_partition()?);}, // This option is for WIP options. Do not execute.
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }
     Ok(())
