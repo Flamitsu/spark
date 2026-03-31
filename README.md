@@ -24,7 +24,7 @@
 
 - [X] Installation process and removal
 
-- [X] CRC32 checksum to detect corrupt disks in partitions and in the GPT header
+- [X] CRC32 checksum to detect corrupt disks and partitions in the GPT header
 
 - [X] Establishing an ESP directory map
 
