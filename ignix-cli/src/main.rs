@@ -1,3 +1,4 @@
+#![deny(warnings)]
 mod boot;
 mod cli;
 mod commands;

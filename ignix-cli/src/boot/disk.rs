@@ -5,9 +5,10 @@ use crate::cli::InstallOptions;
 use crate::config::BLOCK_DEV_ROUTE;
 use crate::errors::IgnixError;
 
-/// This function gets the disks and returns the Vec<String> containing them depending on the arguments given in the execution.
+/// This function gets the disks and returns the `Vec<String>` containing them depending on the arguments given in the execution.
 pub fn get_system_disks(block_route: &str, options: &InstallOptions) 
-    -> Result<Vec<String>, IgnixError>{
+    -> Result<Vec<String>, IgnixError> {
+    
     let mut disks:Vec<String> = Vec::new();
     let disk_devices = read_dir(block_route)?; 
     
@@ -23,7 +24,7 @@ pub fn get_system_disks(block_route: &str, options: &InstallOptions)
         };
         
         if is_valid_block_device(&disk_name, options)?{
-            disks.push(format!("/dev/{}",disk_name));
+            disks.push(disk_name);
         }
     }
     Ok(disks)

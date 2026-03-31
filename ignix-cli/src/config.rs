@@ -9,8 +9,7 @@ pub const EFI_BIN_PATH: &str = "--efi-bin=";
 /// Defines the route that looks up the program to search for real block devices.
 pub const BLOCK_DEV_ROUTE: &str = "/sys/class/block/";
 
-/// Defines the route like '/sys/block/{device}/queue/logical_block_size' 
-#[allow(unused)]
+/// Defines the route '/sys/class/block/{device}/queue/logical_block_size' with format to get the sector block size
 pub const LOGICAL_BLOCK: &str = "/queue/logical_block_size";
 
 /// Neccesary for the confirmation flags in the CLI usage of the tool while the install process. 

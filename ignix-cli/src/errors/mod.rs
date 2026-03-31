@@ -2,6 +2,7 @@ pub mod cmd;
 pub mod nvram;
 pub mod io;
 use core::num::ParseIntError;
+use std::array::TryFromSliceError;
 #[derive(Debug)]
 pub enum IgnixError {
     Cmd(cmd::Error),
@@ -47,6 +48,13 @@ impl From<io::Error> for IgnixError {
 
 impl From<ParseIntError> for IgnixError {
     fn from(err: ParseIntError) -> Self {
+        Self::Io(io::Error::from(err))
+    }
+}
+
+// Makes the try_into compatible with the '?' operator
+impl From<TryFromSliceError> for IgnixError {
+    fn from(err: TryFromSliceError) -> Self {
         Self::Io(io::Error::from(err))
     }
 }
