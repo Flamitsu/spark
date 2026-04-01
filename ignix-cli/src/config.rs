@@ -1,5 +1,15 @@
 // This is the archive where all the config of the program resides. 
 
+// This constants are being used in gpt.rs at this moment
+/// EFI part signature in array of integer bytes.
+pub const EFI_PART_SIGN: [u8;8] = *b"EFI PART";
+/// GPT max header size. Is duplicated from the std one. (92*2)
+pub const MAX_HEADER_SIZE: usize = 184;
+/// GPT max partition array size. Is 128 bytes per entry and 128 bytes the std of GPT.
+const MAX_PARTITION_ARRAY_SIZE: usize = 16384;
+
+pub const MAX_BUFFER_SIZE: usize = MAX_HEADER_SIZE + MAX_PARTITION_ARRAY_SIZE;
+
 /// Default efi bin path that defines where the EFI binary should be located (default and fallback)
 pub const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/ignix/ignixx64.efi";
 

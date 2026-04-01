@@ -37,8 +37,8 @@ fn run() -> Result<(), IgnixError> {
             commands::remove::remove_ignix_installation(options)?
         },
         "update" => commands::update::update_entries()?,
-        "check" => todo!("This command should check the configs and the kernels"),
-        "list" => todo!("This command should list all the aviable kernels configured"),
+        "check" => commands::check::check_ignix_entries(),
+        "list" => commands::list::ignix_list_entries(),
         "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
