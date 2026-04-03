@@ -10,7 +10,7 @@ pub enum Operations{
 
 #[allow(unused)]
 /// This function is the one that manages the ESP structure. (delete or create it.)
-pub fn manage_esp_structure(operation: Operations,disk: &str, efi_binary_route: &Path) 
+pub fn manage_esp_structure(operation: Operations, partition: &str, efi_binary_route: &Path) 
     -> Result<(),IgnixError>{
     
     Ok(())

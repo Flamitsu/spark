@@ -1,25 +1,27 @@
 use crate::boot::disk;
-use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK, EFI_PART_SIGN, MAX_BUFFER_SIZE, MAX_ARRAY_PART_SIZE, MAX_GPT_HEADER_SIZE, ESP_GUID_BYTES, DEVNAME, DEVTYPE, PARTUUID};
+use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK, EFI_PART_SIGN, MAX_BUFFER_SIZE, MAX_GPT_HEADER_SIZE, ESP_GUID_BYTES};
 use crate::errors::{IgnixError, io};
 use crate::errors::cmd;
 use crate::boot::crc32::calculate_crc32;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-use std::path::Path;
 
 pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixError>{
     for device in devices {
-        let sector_size = get_disk_sector_size(&device, BLOCK_DEV_ROUTE, LOGICAL_BLOCK)?;
-        let mut disk = File::open(format!("/dev/{}",device))?;
+        let disk_sysfs_route = &format!("{}{}",BLOCK_DEV_ROUTE, &device);
+        let sector_size = get_disk_sector_size(disk_sysfs_route, LOGICAL_BLOCK)?;
+        let disk = File::open(format!("/dev/{}",device))?;
         let buffer = get_gpt_structure(sector_size, &disk)?;
         
         if !is_disk_efi_signed(buffer)?{
+            eprintln!("{device} isn't EFI signed. Skipping...");
             continue;
         }
         
         let gpt_header_size: u32 = get_gpt_header_size(buffer)?;
 
         if !validate_crc32_header_checksum(buffer, gpt_header_size)?{
+            eprintln!("{device} is probably corrupt (GPT header). Skipping...");
             continue;
         }
 
@@ -29,12 +31,33 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
         let part_array_start: u64 = get_partition_array_start(buffer)?;
         
         if !validate_crc32_partition_array_checksum(buffer, gpt_max_partitions, gpt_entry_size, part_array_start, sector_size)?{
+            eprintln!("{device} is probably corrupt (partition array). Skipping...");
             continue;
         }
 
-        let Some(guid) = get_esp_guid(&buffer, gpt_max_partitions, gpt_entry_size, sector_size, part_array_start)? else { continue; };
-        let partition_guid_string = format_partuuid(&guid)?;
+        let Some(part_guid) = get_esp_guid(&buffer, 
+            gpt_max_partitions, 
+            gpt_entry_size, 
+            sector_size, 
+            part_array_start)? 
+        else { 
+            eprintln!("Not GUID valid found in {device}"); 
+            continue; 
+        };
+        
+        let guid_string = format_partuuid(&part_guid)?;
+        
+        let Some(partition_name) = disk::get_esp_partition(&device, 
+            disk_sysfs_route, 
+            &guid_string)? 
+        else { 
+            eprintln!("Didn't worked the uevent part. {device}"); 
+            continue; 
+        };
+
+        return Ok(partition_name);
     }
+
     Err(cmd::Error::NotEFIPartitionFound)?
 }
 
@@ -68,17 +91,16 @@ fn validate_crc32_header_checksum(buffer:[u8;MAX_BUFFER_SIZE], header_size: u32)
 
 fn validate_crc32_partition_array_checksum(buffer: [u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_entry_size: u32, part_array_start: u64, sector_size: u64) -> Result<bool, IgnixError>{ 
     // Checks if it overflows and it is freed instantly after.
-    {
-        let bytes_of_array = gpt_max_partitions as u64 * gpt_entry_size as u64 + sector_size;
-        if bytes_of_array as usize > MAX_BUFFER_SIZE {
-            Err(io::Error::InvalidBuffer("Partition array buffer overflows.".to_string()))?;
-        }
+    let array_size = (gpt_max_partitions * gpt_entry_size) as usize;
+    let offset = ((part_array_start - 1) * sector_size) as usize;
+    
+    if offset + sector_size as usize > MAX_BUFFER_SIZE{
+        Err(io::Error::InvalidBuffer("Partition array buffer overflows.".to_string()))?
     }
 
-    let offset = sector_size as usize;
     let part_array_crc = u32::from_le_bytes(buffer[88..92].try_into()?);
-    // calculates it as long as the header isn't 
-    let crc32 = calculate_crc32(&buffer[offset..MAX_BUFFER_SIZE]);
+    
+    let crc32 = calculate_crc32(&buffer[offset..(offset + array_size)]);
     
     if part_array_crc == crc32 {
         return Ok(true);
@@ -88,11 +110,10 @@ fn validate_crc32_partition_array_checksum(buffer: [u8;MAX_BUFFER_SIZE], gpt_max
 
 fn get_esp_guid(buffer: &[u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_entry_size: u32, sector_size: u64, part_array_start: u64) -> Result<Option<[u8;16]>, IgnixError>{
     // This -1 here is because the iteration already skips the first LBA0 (MBR PROTECTIVE) sector.
-    let offset = sector_size * part_array_start - 1;
-    
+    let offset = sector_size * (part_array_start - 1);
     for partition in 0..gpt_max_partitions{
         let entry_start = offset as usize + (partition as usize * gpt_entry_size as usize);
-        let entry_end = entry_start + 16;
+        let entry_end = entry_start + gpt_entry_size as usize;
         
         if entry_start > MAX_BUFFER_SIZE{
             Err(io::Error::InvalidBuffer("Invalid buffer while parsing the partition entries. (too long.)".to_string()))?
@@ -108,10 +129,6 @@ fn get_esp_guid(buffer: &[u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_entr
 
     }
     Ok(None)
-}
-
-fn get_esp_partition(device: &str, guid: &str) -> Result<String, IgnixError>{
-    Ok(format!(""))
 }
 
 fn format_partuuid(guid: &[u8;16]) -> Result<String, IgnixError>{
@@ -163,10 +180,10 @@ fn get_gpt_structure(lba_size: u64, mut disk: &File) -> Result<[u8;MAX_BUFFER_SI
  * it's because Rust is being bitchy about that it doesn't know a 'Path' size in
  * compilation time.
  * */
-fn get_disk_sector_size(disk: &str, block_route: &str, lba_size_route: &str)
+fn get_disk_sector_size(disk: &str, lba_size_route: &str)
     -> Result<u64, IgnixError>{
     // Example: /sys/class/block/nvme0n1/queue/logical_block_size
-    let sector_size_path = format!(r"{}{}{}",block_route,disk,lba_size_route);
+    let sector_size_path = format!(r"{}{}",disk,lba_size_route);
     // Reads the value into a string and parses it into an unsigned int value.
     let value: u64 = std::fs::read_to_string(sector_size_path)?.trim().parse()?;
     

@@ -1,4 +1,6 @@
 // This is the archive where all the config of the program resides. 
+/* Those strings are searched in the uevent file in the sysfs interface
+ * to match the gpt.rs UUID.*/ 
 pub const DEVNAME: &str = "DEVNAME=";
 pub const DEVTYPE: &str = "DEVTYPE=";
 pub const PARTUUID: &str = "PARTUUID=";
@@ -14,13 +16,17 @@ pub const ESP_GUID_BYTES: [u8;16]= [
         0xBA, 0x4B, // (BE) DATASET4 -> BA 4B -> BA4B
         0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B // (BE) DATASET5 -> 00 A0 C9 3E C9 3B -> 00A0C93EC93B  
     ];
-// Measures are in bytes.
-const MAX_GPT_PARTITIONS: usize = 128;
+
+/* Measures are in bytes. I don't recommend at all changing this values unless 
+ * you're using some diabolical version of GPT and you need it to specifically
+ * match your disks sectors. What's wrong with you.
+ * Unless the GPT standard changes, (that hasn't been updated since 2015) don't 
+ * commit changing this values.
+ */
+pub const MAX_GPT_PARTITIONS: usize = 128;
 const MAX_GPT_PARTITION_ENTRY_SIZE: usize = 128;
 const MAX_LBA_SECTOR_SIZE: usize = 4096;
-
 pub const MAX_GPT_HEADER_SIZE: usize = 92;
-pub const MAX_ARRAY_PART_SIZE: usize = MAX_GPT_PARTITIONS * MAX_GPT_PARTITION_ENTRY_SIZE;
 // This buffer size is here for security. If this was a heap, will potentially make the code run slower and can expose a thread to systems with corrupt disks.
 pub const MAX_BUFFER_SIZE: usize = MAX_GPT_PARTITIONS * MAX_GPT_PARTITION_ENTRY_SIZE + MAX_LBA_SECTOR_SIZE;
 
