@@ -4,14 +4,14 @@ use crate::boot::crc32::calculate_crc32;
 use std::io::{SeekFrom, Seek, Read};
 use std::fs::File;
 
-pub fn is_disk_efi_signed(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<bool, IgnixError>{
+pub fn is_disk_efi_signed(buffer: &[u8;MAX_BUFFER_SIZE]) -> bool{
     if buffer[0..8] != EFI_PART_SIGN{
-        return Ok(false);
+        return false;
     }
-    Ok(true)
+    true
 }
 
-pub fn validate_crc32_header_checksum(buffer:[u8;MAX_BUFFER_SIZE], header_size: u32) 
+pub fn validate_crc32_header_checksum(buffer: &[u8;MAX_BUFFER_SIZE], header_size: u32) 
     -> Result<bool, IgnixError>{
     let size = header_size as usize;
 
@@ -31,7 +31,7 @@ pub fn validate_crc32_header_checksum(buffer:[u8;MAX_BUFFER_SIZE], header_size: 
     Ok(false)
 }
 
-pub fn validate_crc32_partition_array_checksum(buffer: [u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_entry_size: u32, part_array_start: u64, sector_size: u64) -> Result<bool, IgnixError>{ 
+pub fn validate_crc32_partition_array_checksum(buffer: &[u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_entry_size: u32, part_array_start: u64, sector_size: u64) -> Result<bool, IgnixError>{ 
     // Checks if it overflows and it is freed instantly after.
     let array_size = (gpt_max_partitions * gpt_entry_size) as usize;
     let offset = ((part_array_start - 1) * sector_size) as usize;
@@ -56,8 +56,8 @@ pub fn get_esp_guid(buffer: &[u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_
     for partition in 0..gpt_max_partitions{
         let entry_start = offset as usize + (partition as usize * gpt_entry_size as usize);
         let entry_end = entry_start + gpt_entry_size as usize;
-        
-        if entry_start > MAX_BUFFER_SIZE{
+
+        if entry_start > MAX_BUFFER_SIZE || entry_end > MAX_BUFFER_SIZE {
             Err(io::Error::InvalidBufferOverflow(MAX_BUFFER_SIZE.to_string()))?
         }
         
@@ -74,7 +74,7 @@ pub fn get_esp_guid(buffer: &[u8;MAX_BUFFER_SIZE], gpt_max_partitions: u32, gpt_
 }
 
 
-pub fn get_gpt_header_size(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
+pub fn get_gpt_header_size(buffer: &[u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
     let header_size = u32::from_le_bytes(buffer[12..16].try_into()?);
     if header_size as usize > MAX_GPT_HEADER_SIZE {
         Err(io::Error::InvalidBufferOverflow(MAX_GPT_HEADER_SIZE.to_string()))?
@@ -82,15 +82,16 @@ pub fn get_gpt_header_size(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixErr
     Ok(header_size)
 }
 
-pub fn get_max_gpt_partition(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
+// The offsets in this slices are defined in the GPT specification.
+pub fn get_max_gpt_partition(buffer: &[u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
     Ok(u32::from_le_bytes(buffer[80..84].try_into()?))
 }
 
-pub fn get_partition_array_start(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u64, IgnixError>{
+pub fn get_partition_array_start(buffer: &[u8;MAX_BUFFER_SIZE]) -> Result<u64, IgnixError>{
     Ok(u64::from_le_bytes(buffer[72..80].try_into()?))
 }
 
-pub fn get_partition_max_size(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
+pub fn get_partition_max_size(buffer: &[u8;MAX_BUFFER_SIZE]) -> Result<u32, IgnixError>{
     Ok(u32::from_le_bytes(buffer[84..88].try_into()?))
 }
 
@@ -116,4 +117,90 @@ pub fn get_gpt_structure(lba_size: u64, mut disk: &File) -> Result<[u8;MAX_BUFFE
     disk.read_exact(&mut buffer)?;
 
     Ok(buffer)
+}
+
+#[cfg(test)]
+#[allow(unused)]
+enum FillMode{
+    Sequential,
+    Random,
+}
+
+#[cfg(test)]
+fn fill_test_data(buffer: &mut [u8;MAX_BUFFER_SIZE], start: usize, end: usize, mode: FillMode){
+    match mode{
+        FillMode::Sequential => {
+            for index in start..end{
+                buffer[index] = (index - start) as u8;
+            }
+        },
+        FillMode::Random => {
+            for index in start..end{
+                // multiply a prime number and applies an XOR operation.
+                buffer[index] = ((index * 13) ^ 0xAA) as u8;
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::config::{MAX_GPT_PARTITION_ENTRY_SIZE, MAX_GPT_PARTITIONS, MAX_LBA_SECTOR_SIZE};
+    #[test]
+    fn test_is_disk_efi_signed(){
+        let mut dummy_buffer: [u8;MAX_BUFFER_SIZE] = [0u8;MAX_BUFFER_SIZE];
+        dummy_buffer[0..8].copy_from_slice(&EFI_PART_SIGN);
+        assert_eq!(is_disk_efi_signed(&dummy_buffer), true);
+    }
+    #[test]
+    fn test_disk_is_not_efi_signed() {
+        let mut dummy_buffer: [u8;MAX_BUFFER_SIZE] = [0u8;MAX_BUFFER_SIZE];
+        fill_test_data(&mut dummy_buffer, 0, 8, FillMode::Random);
+        assert_eq!(is_disk_efi_signed(&dummy_buffer), false);
+    }
+
+    #[test]
+    fn test_validate_crc32_header_checksum(){
+        let mut dummy_buffer: [u8;MAX_BUFFER_SIZE] = [0u8;MAX_BUFFER_SIZE];
+        fill_test_data(&mut dummy_buffer, 0, MAX_GPT_HEADER_SIZE, FillMode::Sequential);
+        let header_size = MAX_GPT_HEADER_SIZE as usize;
+        dummy_buffer[16..20].fill(0);
+        let compute_crc = calculate_crc32(&dummy_buffer[..header_size]);
+        dummy_buffer[16..20].copy_from_slice(&compute_crc.to_le_bytes());
+        assert_eq!(validate_crc32_header_checksum(&dummy_buffer, MAX_GPT_HEADER_SIZE as u32).expect("Function returned error instead of true."), true, "Function returned false instead of true.");
+    }
+    #[test]
+    fn test_validate_crc32_header_checksum_invalid() {
+        let mut dummy_buffer: [u8;MAX_BUFFER_SIZE] = [0u8;MAX_BUFFER_SIZE];
+        fill_test_data(&mut dummy_buffer, 0, MAX_BUFFER_SIZE, FillMode::Random);
+        assert_eq!(validate_crc32_header_checksum(&dummy_buffer, MAX_GPT_HEADER_SIZE as u32).expect("Function returned error instead of false."), false, "Function returned true instead of false.")
+    }
+
+    #[test]
+    fn test_validate_crc32_partition_array_checksum_valid() {
+        let mut dummy_buffer: [u8; MAX_BUFFER_SIZE] = [0u8; MAX_BUFFER_SIZE];
+        fill_test_data(&mut dummy_buffer, 0, MAX_BUFFER_SIZE, FillMode::Sequential);
+        let expected_crc = calculate_crc32(&dummy_buffer[MAX_LBA_SECTOR_SIZE..MAX_BUFFER_SIZE]);
+        dummy_buffer[88..92].copy_from_slice(&expected_crc.to_le_bytes());
+        assert_eq!(validate_crc32_partition_array_checksum(&dummy_buffer, MAX_GPT_PARTITIONS as u32, 
+                MAX_GPT_PARTITION_ENTRY_SIZE as u32, 
+                2, 
+                MAX_LBA_SECTOR_SIZE as u64)
+            .expect("Function returned error instead of true."), true, 
+            "Function returned false instead of true."
+            );
+    }
+    #[test]
+    fn test_validate_crc32_partition_array_checksum_invalid(){
+        let mut dummy_buffer: [u8;MAX_BUFFER_SIZE] = [0u8; MAX_BUFFER_SIZE];
+        fill_test_data(&mut dummy_buffer, MAX_LBA_SECTOR_SIZE, MAX_BUFFER_SIZE, FillMode::Random);
+        assert_eq!(validate_crc32_partition_array_checksum(&dummy_buffer, MAX_GPT_PARTITIONS as u32,
+                MAX_GPT_PARTITION_ENTRY_SIZE as u32, 
+                2, 
+                MAX_LBA_SECTOR_SIZE as u64)
+            .expect("Function returned error instead of false."), false, 
+            "Function returned true instead of false."
+            )
+    }
 }

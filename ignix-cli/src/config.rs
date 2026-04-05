@@ -28,8 +28,8 @@ pub const ESP_GUID_BYTES: [u8;16]= [
  * commit changing this values.
  */
 pub const MAX_GPT_PARTITIONS: usize = 128;
-const MAX_GPT_PARTITION_ENTRY_SIZE: usize = 128;
-const MAX_LBA_SECTOR_SIZE: usize = 4096;
+pub const MAX_GPT_PARTITION_ENTRY_SIZE: usize = 128;
+pub const MAX_LBA_SECTOR_SIZE: usize = 4096;
 pub const MAX_GPT_HEADER_SIZE: usize = 92;
 // This buffer size is here for security. If this was a heap, will potentially make the code run slower and can expose a thread to systems with corrupt disks.
 pub const MAX_BUFFER_SIZE: usize = MAX_GPT_PARTITIONS * MAX_GPT_PARTITION_ENTRY_SIZE + MAX_LBA_SECTOR_SIZE;

@@ -39,24 +39,24 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
         let disk = File::open(PathBuf::from("/dev/").join(&device))?;
         let buffer = gpt::get_gpt_structure(sector_size, &disk)?;
         
-        if !gpt::is_disk_efi_signed(buffer)?{
+        if !gpt::is_disk_efi_signed(&buffer){
             eprintln!("{device} isn't EFI signed. Skipping...");
             continue;
         }
         
-        let gpt_header_size: u32 = gpt::get_gpt_header_size(buffer)?;
+        let gpt_header_size: u32 = gpt::get_gpt_header_size(&buffer)?;
 
-        if !gpt::validate_crc32_header_checksum(buffer, gpt_header_size)?{
+        if !gpt::validate_crc32_header_checksum(&buffer, gpt_header_size)?{
             eprintln!("{device} is probably corrupt (GPT header). Skipping...");
             continue;
         }
 
         // The standard says here the max should be 128, however it is dynamic here just in case.
-        let gpt_max_partitions: u32 = gpt::get_max_gpt_partition(buffer)?;
-        let gpt_entry_size: u32 = gpt::get_partition_max_size(buffer)?;
-        let part_array_start: u64 = gpt::get_partition_array_start(buffer)?;
+        let gpt_max_partitions: u32 = gpt::get_max_gpt_partition(&buffer)?;
+        let gpt_entry_size: u32 = gpt::get_partition_max_size(&buffer)?;
+        let part_array_start: u64 = gpt::get_partition_array_start(&buffer)?;
         
-        if !gpt::validate_crc32_partition_array_checksum(buffer, gpt_max_partitions, gpt_entry_size, part_array_start, sector_size)?{
+        if !gpt::validate_crc32_partition_array_checksum(&buffer, gpt_max_partitions, gpt_entry_size, part_array_start, sector_size)?{
             eprintln!("{device} is probably corrupt (partition array). Skipping...");
             continue;
         }
