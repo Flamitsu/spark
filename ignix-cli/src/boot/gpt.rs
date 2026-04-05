@@ -1,6 +1,8 @@
 use crate::config::{EFI_PART_SIGN, MAX_BUFFER_SIZE, MAX_GPT_HEADER_SIZE, ESP_GUID_BYTES};
 use crate::errors::{IgnixError, io};
 use crate::boot::crc32::calculate_crc32;
+use std::io::{SeekFrom, Seek, Read};
+use std::fs::File;
 
 pub fn is_disk_efi_signed(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<bool, IgnixError>{
     if buffer[0..8] != EFI_PART_SIGN{
@@ -92,3 +94,26 @@ pub fn get_partition_max_size(buffer: [u8;MAX_BUFFER_SIZE]) -> Result<u32, Ignix
     Ok(u32::from_le_bytes(buffer[84..88].try_into()?))
 }
 
+pub fn format_partuuid(guid: &[u8;16]) -> Result<String, IgnixError>{
+    let data1 = u32::from_le_bytes(guid[0..4].try_into()?);
+    let data2 = u16::from_le_bytes(guid[4..6].try_into()?);
+    let data3 = u16::from_le_bytes(guid[6..8].try_into()?);
+    Ok(
+        // If the field isn't big enough the format says to add padding. x is for small letters.
+        format!(
+        "{:08x}-{:04x}-{:04x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
+        data1, data2, data3,
+        guid[8], guid[9],
+        guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]
+        )
+    )
+}
+
+pub fn get_gpt_structure(lba_size: u64, mut disk: &File) -> Result<[u8;MAX_BUFFER_SIZE], IgnixError>{
+    let mut buffer = [0u8;MAX_BUFFER_SIZE];
+    
+    disk.seek(SeekFrom::Start(lba_size))?;
+    disk.read_exact(&mut buffer)?;
+
+    Ok(buffer)
+}

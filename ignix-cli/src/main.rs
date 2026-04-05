@@ -34,7 +34,7 @@ fn run() -> Result<(), IgnixError> {
         },
         "remove" => {
             let options = cli::parse_remove_args(&args)?;
-            commands::remove::remove_ignix_installation(options)?
+            commands::remove::remove_ignix(options.force)?
         },
         "update" => commands::update::update_entries()?,
         "check" => commands::check::check_ignix_entries(),
