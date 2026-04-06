@@ -7,7 +7,7 @@ mod config; // Here is where all the consts resides centralized
 use std::env;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
-use crate::config::BLOCK_DEV_ROUTE;
+
 fn main(){
     // This if runs the actual program, if there is any error, it will exit it.
     if let Err(error) = run(){

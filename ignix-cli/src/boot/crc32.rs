@@ -48,6 +48,13 @@ mod test {
         let input = b"123456789";
         let crc32_result = 0xCBF43926;
         let crc32 = calculate_crc32(input);
-        assert_eq!(crc32,crc32_result, "CRC32 checksum function does not match the waited value.");
+        assert_eq!(crc32,crc32_result, "Function does not match the waited value.");
+    }
+    #[test]
+    fn test_calculate_crc32_invalid(){
+        let input = b"123456789";
+        let crc32_result = 0xCBF43927;
+        let crc32 = calculate_crc32(input);
+        assert_ne!(crc32,crc32_result, "Function does not match the waited value.")
     }
 }
