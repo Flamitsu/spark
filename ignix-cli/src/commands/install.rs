@@ -1,6 +1,6 @@
 use crate::boot::disk;
 use crate::cli::{InstallOptions, ask_user_confirmation};
-use crate::config::LOGICAL_BLOCK;
+use crate::config::BLOCK_DEV_ROUTE;
 use crate::IgnixError;
 /// This function should install the ignixx64.efi binary in the current ESP partition.
 pub fn install_ignix(options: InstallOptions) -> Result<(), IgnixError>{
@@ -12,7 +12,7 @@ pub fn install_ignix(options: InstallOptions) -> Result<(), IgnixError>{
     let _esp_target = if let Some(route) = &options.install_route{
         route.to_string_lossy().to_string()
     } else {
-        let disks = disk::get_system_disks(LOGICAL_BLOCK, &options)?;
+        let disks = disk::get_system_disks(BLOCK_DEV_ROUTE, options.allow_virtual, options.removable_device)?;
         disk::compatible_esp_partition(disks)?
     };
  

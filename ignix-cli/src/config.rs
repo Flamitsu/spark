@@ -40,7 +40,7 @@ pub const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/ignix/ignixx64.efi";
 /// Defines the route that looks up the program to search for real block devices.
 pub const BLOCK_DEV_ROUTE: &str = "/sys/class/block/";
 /// Defines the route '/sys/class/block/{device}/queue/logical_block_size' with format to get the sector block size
-pub const LOGICAL_BLOCK: &str = "/queue/logical_block_size";
+pub const LOGICAL_BLOCK_SIZE: &str = "queue/logical_block_size";
 
 // Arguments 
 /// Neccesary for the confirmation flags in the CLI usage of the tool while the install process. 

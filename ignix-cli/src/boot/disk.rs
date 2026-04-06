@@ -1,13 +1,12 @@
 use std::path::PathBuf;
 use std::fs::{read_dir,File};
-use crate::cli::InstallOptions;
-use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK};
+use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK_SIZE};
 use crate::errors::IgnixError;
 use crate::boot::{gpt, sysfs};
 use crate::errors::cmd;
 
 /// This function gets the disks and returns the `Vec<String>` containing them depending on the arguments given in the execution.
-pub fn get_system_disks(block_route: &str, options: &InstallOptions) 
+pub fn get_system_disks(block_route: &str, allow_virtual: bool, allow_removable: bool) 
     -> Result<Vec<String>, IgnixError> {
     
     let mut disks:Vec<String> = Vec::new();
@@ -24,7 +23,7 @@ pub fn get_system_disks(block_route: &str, options: &InstallOptions)
             continue;
         };
         
-        if is_valid_block_device(&disk_name, options)?{
+        if is_valid_block_device(&disk_name, allow_removable, allow_virtual)?{
             disks.push(disk_name);
         }
     }
@@ -35,7 +34,7 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
     for device in devices {
         let disk_sysfs_route = PathBuf::from(BLOCK_DEV_ROUTE).join(&device);
         
-        let sector_size = sysfs::get_disk_sector_size(&disk_sysfs_route, LOGICAL_BLOCK)?;
+        let sector_size = sysfs::get_disk_sector_size(&disk_sysfs_route, LOGICAL_BLOCK_SIZE)?;
         let disk = File::open(PathBuf::from("/dev/").join(&device))?;
         let buffer = gpt::get_gpt_structure(sector_size, &disk)?;
         
@@ -80,7 +79,7 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
             eprintln!("Didn't found {device} with {guid_string} in the sysfs interface."); 
             continue; 
         };
-
+        println!("{}",partition_name);
         return Ok(partition_name);
     }
 
@@ -88,16 +87,17 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
 }
 
 /// Check if a partition gets a valid block name or not depending on the arguments provided in the moment of the execution.
-fn is_valid_block_device(device_name: &str, options: &InstallOptions) -> Result<bool, IgnixError>{
+fn is_valid_block_device(device_name: &str, allow_removable: bool, allow_virtual: bool) 
+    -> Result<bool, IgnixError>{
     let route = PathBuf::from(BLOCK_DEV_ROUTE).join(device_name);
     
     /* If the device is a virtual device and the options says to install it in a virutal device
      * then the program will mark it as valid disk*/
-    if sysfs::is_virtual_device(&route)? && !options.allow_virtual {
+    if sysfs::is_virtual_device(&route)? && !allow_virtual {
         return Ok(false);
     }
 
-    if sysfs::is_removable_device(&route)? && !options.removable_device{
+    if sysfs::is_removable_device(&route)? && !allow_removable{
         return Ok(false);
     }
 
