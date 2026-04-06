@@ -1,4 +1,5 @@
 // CONSTANTS & SYSTEM CONFIG
+pub const ESP_DIR: [&str;3] = ["EFI/BOOT/","loader/entries/","EFI/ignix/"];
 pub const MOUNTPOINTS: &str = "/proc/mounts";
 pub const DEVNAME: &str = "DEVNAME=";
 pub const DEVTYPE: &str = "DEVTYPE=";
@@ -55,8 +56,7 @@ pub const BLOCK_DEV_ROUTE: &str = "/sys/class/block/";
 pub const LOGICAL_BLOCK_SIZE: &str = "queue/logical_block_size";
 
 // ARGUMENTS  
-pub const SHORT_CONFIRMATION_FLAG: &str = "-y";
-pub const LONG_CONFIRMATION_FLAG: &str = "--yes";
+pub const FORCE_FLAG: &str = "--force";
 pub const ALLOW_VIRTUAL_FLAG: &str = "--allow-virtual";
 pub const NO_NVRAM: &str = "--no-nvram";
 pub const INSTALL_ROUTE: &str = "--install-route=";

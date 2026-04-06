@@ -4,10 +4,10 @@ mod cli;
 mod commands;
 mod errors;
 mod config; // Here is where all the consts resides centralized
+mod system;
 use std::env;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
-
 fn main(){
     // This if runs the actual program, if there is any error, it will exit it.
     if let Err(error) = run(){
@@ -34,7 +34,7 @@ fn run() -> Result<(), IgnixError> {
         },
         "remove" => {
             let options = cli::parse_remove_args(&args)?;
-            commands::remove::remove_ignix(options.force)?
+            commands::remove::remove_ignix(options)?
         },
         "update" => commands::update::update_entries()?,
         "check" => commands::check::check_ignix_entries(),

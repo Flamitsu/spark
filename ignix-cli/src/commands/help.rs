@@ -15,7 +15,7 @@ COMMANDS:
     help        Prints this help information
 
 OPTIONS:
-    -y, --yes               Skip all interactive confirmation prompts
+    --force                 Skip all interactive confirmation prompts. Only use if you know what you're doing.
     --efi-bin=[PATH]        Manual path to the EFI binary (default: auto-detect)
     --no-nvram              Skips all the logic to write a NVRAM variable.
     --allow-virtual         Allows to install the .efi bin in a virtual device.

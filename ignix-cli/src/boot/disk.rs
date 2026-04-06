@@ -79,7 +79,6 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
             eprintln!("Didn't found {device} with {guid_string} in the sysfs interface."); 
             continue; 
         };
-        println!("{}",partition_name);
         return Ok(partition_name);
     }
 

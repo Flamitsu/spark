@@ -1,4 +1,4 @@
-use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH, INSTALL_ROUTE, LONG_CONFIRMATION_FLAG, NO_NVRAM, REMOVABLE_FLAG, SHORT_CONFIRMATION_FLAG};
+use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH, INSTALL_ROUTE, FORCE_FLAG, NO_NVRAM, REMOVABLE_FLAG};
 use crate::errors::{IgnixError, io, cmd};
 use std::io::{Write, stdin,stdout};
 use std::path::PathBuf;
@@ -28,7 +28,7 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
     for arg in args.iter().skip(2){
         
         match arg.as_str(){
-            SHORT_CONFIRMATION_FLAG | LONG_CONFIRMATION_FLAG => force = true,
+            FORCE_FLAG => force = true,
             ALLOW_VIRTUAL_FLAG => allow_virtual = true,
             NO_NVRAM => no_nvram = true,
             REMOVABLE_FLAG => removable_device = true,
@@ -55,7 +55,7 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
 pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
     Ok(RemoveOptions {
         force: args.iter()
-            .skip(2).any(|a| a == SHORT_CONFIRMATION_FLAG || a == LONG_CONFIRMATION_FLAG)
+            .skip(2).any(|a| a == FORCE_FLAG)
     })
 }
 

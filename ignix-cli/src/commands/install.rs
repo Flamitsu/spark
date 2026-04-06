@@ -1,4 +1,4 @@
-use crate::boot::disk;
+use crate::boot::{disk, esp};
 use crate::cli::{InstallOptions, ask_user_confirmation};
 use crate::config::BLOCK_DEV_ROUTE;
 use crate::IgnixError;
@@ -9,12 +9,12 @@ pub fn install_ignix(options: InstallOptions) -> Result<(), IgnixError>{
         ask_user_confirmation("install")?;
     }
     
-    let _esp_target = if let Some(route) = &options.install_route{
+    let esp_target = if let Some(route) = &options.install_route{
         route.to_string_lossy().to_string()
     } else {
         let disks = disk::get_system_disks(BLOCK_DEV_ROUTE, options.allow_virtual, options.removable_device)?;
         disk::compatible_esp_partition(disks)?
     };
- 
+    esp::create_ignix_structure(&esp_target, &options.efi_bin, options.no_nvram, options.force)?;
     Ok(())
 }
