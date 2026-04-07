@@ -4,6 +4,7 @@ mod cli;
 mod commands;
 mod errors;
 mod config; // Here is where all the consts resides centralized
+#[allow(unused)]
 mod system;
 use std::env;
 use crate::errors::IgnixError;
