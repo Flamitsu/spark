@@ -18,9 +18,10 @@ pub const ESP_GUID_BYTES: [u8;16]= [
 pub const MAX_GPT_PARTITIONS: usize = 128;
 pub const MAX_GPT_PARTITION_ENTRY_SIZE: usize = 128;
 pub const MAX_LBA_SECTOR_SIZE: usize = 4096;
-pub const GPT_HDR_MAX_SIZE: usize = 92;
+pub const MAX_GPT_HDR_SIZE: usize = 92;
 pub const MAX_BUFFER_SIZE: usize = MAX_GPT_PARTITIONS * MAX_GPT_PARTITION_ENTRY_SIZE + MAX_LBA_SECTOR_SIZE;
-
+pub const MAX_GPT_HDR_PART_LBA: usize = 2;
+pub const MAX_GPT_HDR_PART_SIZE: usize = 128;
 // GPT HEADER OFFSETS (LBA 1)
 // GPT header signature start (Normally "EFI PART")
 pub const GPT_HDR_SIG: Range<usize> = 0..8;

@@ -6,7 +6,11 @@ pub enum Error {
     PermissionDenied,
     NotFound(String),
     InvalidFormat(String),
-    InvalidBufferOverflow(String),
+    InvalidBufferOverflow{
+        context: String,
+        found: usize,
+        limit: usize
+    },
     Unknown(std::io::Error),
 }
 
@@ -16,7 +20,7 @@ impl std::fmt::Display for Error {
             Self::PermissionDenied => write!(f, "Access denied. Please run Ignix with higher privileges."),
             Self::NotFound(path) => write!(f, "The system could not find the specified path: {}", path),
             Self::InvalidFormat(e) => write!(f, "Data format error: {}",e),
-            Self::InvalidBufferOverflow(e) => write!(f, "{}, Invalid buffer while reading the GPT disk. Check if the disk is corrupt.",e),
+            Self::InvalidBufferOverflow{context, found, limit} => write!(f, "Invalid {} size: {} bytes. (Limit exceeded: max allowed is {} bytes). The GPT structure may be corrupt.",context,found,limit),
             Self::Unknown(e) => write!(f, "An unexpected system error occurred: {}", e),
         }
     }
@@ -43,6 +47,6 @@ impl From<TryFromSliceError> for Error {
     fn from(err: TryFromSliceError) -> Self {
         // Usamos InvalidBuffer porque un error de try_into en este contexto
         // significa que el slice de bytes no encaja en el array (ej: GUID o CRC)
-        Self::InvalidBufferOverflow(format!("Slice conversion failed: {}", err))
+        Self::InvalidFormat(format!("Slice conversion failed: {}", err))
     }
 }
