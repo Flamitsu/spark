@@ -20,7 +20,7 @@ pub fn create_ignix_structure(partition:&str, efi_bin:&Path, no_nvram:bool, forc
             fs::create_dir_all(&dir_route);
         }
         if dir.ends_with("ignix/"){
-            fs::copy(efi_bin, &dir_route.join("ignixx64.efi"))?;
+            fs::copy(efi_bin, dir_route.join("ignixx64.efi"))?;
         }
         if dir.ends_with("BOOT/"){
             fs::copy(efi_bin, &efi_fallback)?;

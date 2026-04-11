@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::fs::{read_dir,File};
-use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK_SIZE};
+use crate::config::{BLOCK_DEV_ROUTE, LOGICAL_BLOCK_SIZE, MAX_BUFFER_SIZE};
 use crate::errors::IgnixError;
 use crate::boot::{gpt, sysfs};
 use crate::errors::cmd;
@@ -36,7 +36,8 @@ pub fn compatible_esp_partition(devices: Vec<String>) -> Result<String, IgnixErr
         
         let sector_size = sysfs::get_disk_sector_size(&disk_sysfs_route, LOGICAL_BLOCK_SIZE)?;
         let disk = File::open(PathBuf::from("/dev/").join(&device))?;
-        let buffer = gpt::get_gpt_structure(sector_size, &disk)?;
+        let mut buffer: [u8;MAX_BUFFER_SIZE] = [0u8;MAX_BUFFER_SIZE];
+        gpt::get_gpt_structure(sector_size, &disk, &mut buffer)?;
         
         if !gpt::is_disk_efi_signed(&buffer){
             eprintln!("{device} isn't EFI signed. Skipping...");

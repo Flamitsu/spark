@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 // CONSTANTS & SYSTEM CONFIG
 pub const ESP_DIR: [&str;3] = ["EFI/BOOT/","loader/entries/","EFI/ignix/"];
 pub const MOUNTPOINTS: &str = "/proc/mounts";
@@ -16,39 +18,29 @@ pub const ESP_GUID_BYTES: [u8;16]= [
 pub const MAX_GPT_PARTITIONS: usize = 128;
 pub const MAX_GPT_PARTITION_ENTRY_SIZE: usize = 128;
 pub const MAX_LBA_SECTOR_SIZE: usize = 4096;
-pub const MAX_GPT_HEADER_SIZE: usize = 92;
+pub const GPT_HDR_MAX_SIZE: usize = 92;
 pub const MAX_BUFFER_SIZE: usize = MAX_GPT_PARTITIONS * MAX_GPT_PARTITION_ENTRY_SIZE + MAX_LBA_SECTOR_SIZE;
 
 // GPT HEADER OFFSETS (LBA 1)
 // GPT header signature start (Normally "EFI PART")
-pub const GPT_HDR_SIG_START: usize = 0;
-pub const GPT_HDR_SIG_END: usize = 8;
+pub const GPT_HDR_SIG: Range<usize> = 0..8;
 // GPT header size (normally 92)
-pub const GPT_HDR_SIZE_START: usize = 12;
-pub const GPT_HDR_SIZE_END: usize = 16;
+pub const GPT_HDR_SIZE: Range<usize> = 12..16;
 // CRC32 header location.
-pub const GPT_HDR_CRC_START: usize = 16;
-pub const GPT_HDR_CRC_END: usize = 20;
+pub const GPT_HDR_CRC: Range<usize> = 16..20;
 // Where does the partition array starts
-pub const GPT_HDR_PART_LBA_START: usize = 72;
-pub const GPT_HDR_PART_LBA_END: usize = 80;
+pub const GPT_HDR_PART_LBA: Range<usize> = 72..80;
 // How many partitions can the disk have.
-pub const GPT_HDR_PART_COUNT_START: usize = 80;
-pub const GPT_HDR_PART_COUNT_END: usize = 84;
+pub const GPT_HDR_PART_COUNT: Range<usize> = 80..84;
 // Each GPT entry size (normally 128)
-pub const GPT_HDR_PART_SIZE_START: usize = 84;
-pub const GPT_HDR_PART_SIZE_END: usize = 88;
+pub const GPT_HDR_PART_SIZE: Range<usize> = 84..88;
 // CRC32 of the partition array
-pub const GPT_HDR_PART_CRC_START: usize = 88;
-pub const GPT_HDR_PART_CRC_END: usize = 92;
+pub const GPT_HDR_PART_CRC: Range<usize> = 88..92;
 
 
 // PARTITION ENTRY OFFSETS
-pub const PART_TYPE_GUID_START: usize = 0;
-pub const PART_TYPE_GUID_END: usize = 16;
-
-pub const PART_UNIQUE_GUID_START: usize = 16;
-pub const PART_UNIQUE_GUID_END: usize = 32;
+pub const PART_TYPE_GUID: Range<usize> = 0..16;
+pub const PART_UNIQUE_GUID: Range<usize> = 16..32;
 
 // ROUTES
 pub const DEFAULT_EFI_BIN_PATH: &str = "/usr/lib/ignix/ignixx64.efi";
