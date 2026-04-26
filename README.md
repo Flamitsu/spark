@@ -1,4 +1,7 @@
 # Ignix
+## TO SOMEONE WATCHING THIS REPOSITORY
+**This project is not ABANDONED. It's just being delayed. I currently need to focus at 100% for my final degree project. I hope you can understand.** 
+
 ## Pre alpha stage
 **BIG DISCLAIMER** - **Ignix** is a **PRE ALPHA STAGE boot manager** written in Rust, **IT IS NOT MEANT TO BE USED IN PRODUCTION AT THIS MOMENT**.
 ## Table of contents
