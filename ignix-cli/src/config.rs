@@ -10,38 +10,27 @@ use std::ops::Range;
  * The structure of this archive is normally: comment -> data. This is because in some IDEs you 
  * can have the autocompletion and it will show up the comment that references to that value.
 */
-
-pub struct BLSConfigurations{
-    pub esp_directories: [&'static str;3]
+pub struct EspStructure;
+impl EspStructure{
+    pub const ESP_DIRECTORIES: [&'static str; 3] = ["EFI/BOOT", "loader/entries", "EFI/ignix"];
+}
+pub struct DevLinuxTags;
+impl DevLinuxTags{
+    pub const DEVNAME: &'static str = "DEVNAME=";
+    pub const DEVTYPE: &'static str = "DEVTYPE=";
+    pub const PARTUUID: &'static str = "PARTUUID=";
 }
 
-pub const BLS_CONFIG: BLSConfigurations = BLSConfigurations {
-    esp_directories: ["EFI/BOOT", "loader/entries", "EFI/ignix/"]
-};
-
-pub struct DevLinuxTags{
-    pub devname: &'static str,
-    pub devtype: &'static str,
-    pub partuuid: &'static str
-}
-pub const DEV_LINUX_TAGS: DevLinuxTags = DevLinuxTags{
-    devname: "DEVNAME=",
-    devtype: "DEVTYPE=",
-    partuuid: "PARTUUID="
-};
-
-pub struct GptSpecification {
-    pub efi_sig: [u8;8],
-    pub esp_guid_sig: [u8;16]
-}
-pub const GPT_SPEC: GptSpecification = GptSpecification{
-    efi_sig: *b"EFI PART",
-    esp_guid_sig: [0x28, 0x73, 0x2A, 0xC1,
+pub struct GptSpecification;
+impl GptSpecification{
+    pub const EFI_SIGN: [u8;8] = *b"EFI PART";
+    pub const ESP_GUID_SIG: [u8;16] = [0x28, 0x73, 0x2A, 0xC1,
     0x1F, 0xF8,
     0xD2, 0x11,
-    0xBA, 0x4B,
-    0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B]
-};
+    0xBa, 0x4B,
+    0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B];
+}
+
 // Those values follow the instructions of the GPT std at 18/04/2026.
 pub struct GptLimits{
     pub gpt_partitions: usize,
@@ -61,9 +50,9 @@ impl GptLimits {
     const fn new(gpt_partitions: usize, partition_entry_size: usize, lba_sector_size: usize) -> Self{
         let buffer_size = (gpt_partitions * partition_entry_size) + lba_sector_size;
         Self {
-            gpt_partitions,
-            partition_entry_size,
-            lba_sector_size,
+            gpt_partitions: 128,
+            partition_entry_size: 128,
+            lba_sector_size: 4096,
             header_size: 92,
             buffer_size,
             header_part_lba: 2,
@@ -71,47 +60,34 @@ impl GptLimits {
         }
     }
 }
-
 const LIMITS: GptLimits = GptLimits::new(128, 128, 4096);
 
 // GPT HEADER OFFSETS (LBA 1)
-pub struct GptHeaderOffsets{
+pub struct GptHeaderOffsets;
+impl GptHeaderOffsets{
     // GPT header signature start (Normally "EFI PART" in Little Endian)
-    pub sig: Range<usize>,
+    pub const SIG: Range<usize> = 0..8;
     // GPT header size (normally 92)
-    pub size: Range<usize>,
-    // CRC32 bytes location. 
-    pub crc: Range<usize>,
+    pub const SIZE: Range<usize> = 12..16;
+    // CRC32 bytes location.
+    pub const CRC: Range<usize> = 16..20;
     // Where does the partition array starts
-    pub part_lba: Range<usize>,
+    pub const PART_LBA: Range<usize> = 72..80;
     // How many partitions can the disk have.
-    pub part_count: Range<usize>,
+    pub const PART_COUNT: Range<usize> = 80..84;
     // Each GPT entry size (normally is 128 bytes).
-    pub part_size: Range<usize>,
+    pub const PART_SIZE: Range<usize> = 84..88;
     // CRC32 of the partition array.
-    pub part_crc: Range<usize>,
+    pub const PART_CRC: Range<usize> = 88..92;
 }
 
-pub const HEADER: GptHeaderOffsets = GptHeaderOffsets{
-    sig: 0..8,
-    size: 12..16,
-    crc: 16..20,
-    part_lba: 72..80,
-    part_count: 80..84,
-    part_size: 84..88,
-    part_crc: 88..92
-};
-
-pub struct GptEntryOffsets{
+pub struct GptEntryOffsets;
+impl GptEntryOffsets{
     // Partition type GUID (Linux Root or Linux x86 for example).
-    pub type_guid: Range<usize>,
+    pub const TYPE_GUID: Range<usize> = 0..16;
     // Partition unique GUID (UUID v4 unique per partition).
-    pub unique_guid: Range<usize>
+    pub const UNIQUE_GUID: Range<usize> = 16..32;
 }
-pub const PARTITION: GptEntryOffsets = GptEntryOffsets {
-    type_guid: 0..16,
-    unique_guid: 16..32
-};
 
 pub struct Routes;
 impl Routes{
@@ -126,7 +102,6 @@ impl Routes{
 }
 
 pub struct Flag;
-
 impl Flag {
     pub const FORCE_FLAG: &'static str = "--force";
     pub const ALLOW_VIRTUAL_FLAG: &'static str = "--allow-virtual";
