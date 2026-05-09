@@ -1,4 +1,4 @@
-use crate::config::{ALLOW_VIRTUAL_FLAG, DEFAULT_EFI_BIN_PATH, EFI_BIN_PATH, INSTALL_ROUTE, FORCE_FLAG, NO_NVRAM, REMOVABLE_FLAG};
+use crate::config::{Flag, Routes};
 use crate::errors::{IgnixError, io, cmd};
 use std::io::{Write, stdin,stdout};
 use std::path::PathBuf;
@@ -28,17 +28,17 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
     for arg in args.iter().skip(2){
         
         match arg.as_str(){
-            FORCE_FLAG => force = true,
-            ALLOW_VIRTUAL_FLAG => allow_virtual = true,
-            NO_NVRAM => no_nvram = true,
-            REMOVABLE_FLAG => removable_device = true,
+            Flag::FORCE_FLAG => force = true,
+            Flag::ALLOW_VIRTUAL_FLAG => allow_virtual = true,
+            Flag::NO_NVRAM => no_nvram = true,
+            Flag::REMOVABLE_FLAG => removable_device = true,
             _ => parse_prefixed_arg(arg, &mut install_route, &mut efi_bin_provided)?
         }
     } 
 
     let efi_bin = match efi_bin_provided {
         Some(path) => path,
-        None => is_valid_efi_bin_path(DEFAULT_EFI_BIN_PATH)?,
+        None => is_valid_efi_bin_path(Routes::DEFAULT_EFI_BIN_PATH)?,
     };
 
     Ok(InstallOptions {
@@ -55,7 +55,7 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
 pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
     Ok(RemoveOptions {
         force: args.iter()
-            .skip(2).any(|a| a == FORCE_FLAG)
+            .skip(2).any(|a| a == Flag::FORCE_FLAG)
     })
 }
 
@@ -81,9 +81,9 @@ pub fn ask_user_confirmation(context: &str) -> Result<bool, IgnixError>{
 
 fn parse_prefixed_arg( arg: &str, route: &mut Option<PathBuf>, efi: &mut Option<PathBuf>) 
     -> Result<(), IgnixError> {
-    if let Some(path) = arg.strip_prefix(INSTALL_ROUTE) {
+    if let Some(path) = arg.strip_prefix(Flag::INSTALL_ROUTE) {
         *route = Some(is_valid_install_path(path)?);
-    } else if let Some(path) = arg.strip_prefix(EFI_BIN_PATH) {
+    } else if let Some(path) = arg.strip_prefix(Flag::EFI_BIN_PATH) {
         *efi = Some(is_valid_efi_bin_path(path)?);
     } else {
         Err(cmd::Error::InvalidArgument(arg.to_string()))?

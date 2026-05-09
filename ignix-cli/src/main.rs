@@ -1,11 +1,10 @@
-#![deny(warnings)]
-mod boot;
+#[allow(unused)]
+mod errors;
+#[allow(unused)]
+pub mod config; // Here is where all the consts resides centralized
+#[allow(unused)]
 mod cli;
 mod commands;
-mod errors;
-mod config; // Here is where all the consts resides centralized
-#[allow(unused)]
-mod system;
 use std::env;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
@@ -29,18 +28,6 @@ fn run() -> Result<(), IgnixError> {
     
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
-        "install" => {
-            let options = cli::parse_install_args(&args)?;
-            commands::install::install_ignix(options)?
-        },
-        "remove" => {
-            let options = cli::parse_remove_args(&args)?;
-            commands::remove::remove_ignix(options)?
-        },
-        "update" => commands::update::update_entries()?,
-        "check" => commands::check::check_ignix_entries(),
-        "list" => commands::list::ignix_list_entries(),
-        "clean" => commands::clean::clean_entries()?,
         "help" => commands::help::show_help(),
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }

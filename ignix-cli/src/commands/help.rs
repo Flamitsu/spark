@@ -1,17 +1,9 @@
 pub fn show_help() {
     const HELP_TEXT: &str = r#"
-Ignix: A minimalist EFI boot manager written in Rust.
-
 USAGE:
     ignix [COMMAND] [OPTIONS]
 
 COMMANDS:
-    install     Installs ignix binary into the EFI System Partition
-    remove      Removes ignix and its configuration from the ESP
-    list        List all the current entries in the system
-    check       Check the current configured entries and their integrity
-    update      Synchronizes kernel entries and updates boot configuration
-    clean       Removes invalid boot entries
     help        Prints this help information
 
 OPTIONS:
