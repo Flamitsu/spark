@@ -1,4 +1,21 @@
-use std::ops::Range;
+/*
+ * Copyright (C) 2026 Flamitsu
+ *
+ * This file is part of Ignix.
+ *
+ * Ignix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * Ignix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 /*
  * The structure of this archive is: Structs and later the constants with the associated value.
  * Its done this way because Rust does not implements in this date the capability to associate 
@@ -10,10 +27,13 @@ use std::ops::Range;
  * The structure of this archive is normally: comment -> data. This is because in some IDEs you 
  * can have the autocompletion and it will show up the comment that references to that value.
 */
+use std::ops::Range;
+
 pub struct EspStructure;
 impl EspStructure{
     pub const ESP_DIRECTORIES: [&'static str; 3] = ["EFI/BOOT", "loader/entries", "EFI/ignix"];
 }
+
 pub struct DevLinuxTags;
 impl DevLinuxTags{
     pub const DEVNAME: &'static str = "DEVNAME=";
