@@ -20,6 +20,7 @@ use crate::config::{Flag, Routes};
 use crate::errors::IgnixError;
 use crate::cli::{validate, parser};
 use crate::cli::args::{InstallOptions, RemoveOptions};
+
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
     
     let mut force = false;

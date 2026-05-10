@@ -20,6 +20,7 @@ use crate::errors::cmd;
 use crate::config::Flag;
 use std::path::PathBuf;
 use crate::cli::validate;
+
 pub fn parse_prefixed_arg( arg: &str, route: &mut Option<PathBuf>, efi: &mut Option<PathBuf>) 
     -> Result<(), IgnixError> {
     if let Some(path) = arg.strip_prefix(Flag::INSTALL_ROUTE) {

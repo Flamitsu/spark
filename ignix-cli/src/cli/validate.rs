@@ -19,6 +19,7 @@ use std::path::PathBuf;
 use crate::errors::IgnixError;
 use crate::errors::{io, cmd};
 use std::io::{Write, stdin, stdout};
+
 pub fn is_valid_efi_bin_path(route: &str) -> Result<PathBuf, IgnixError>{
     let path = PathBuf::from(route);
     if !path.exists() || path.extension().is_none_or(|ext| ext != "efi") {

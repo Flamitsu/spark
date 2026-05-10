@@ -70,9 +70,9 @@ impl GptLimits {
     const fn new(gpt_partitions: usize, partition_entry_size: usize, lba_sector_size: usize) -> Self{
         let buffer_size = (gpt_partitions * partition_entry_size) + lba_sector_size;
         Self {
-            gpt_partitions: 128,
-            partition_entry_size: 128,
-            lba_sector_size: 4096,
+            gpt_partitions: gpt_partitions,
+            partition_entry_size: partition_entry_size,
+            lba_sector_size: lba_sector_size,
             header_size: 92,
             buffer_size,
             header_part_lba: 2,
