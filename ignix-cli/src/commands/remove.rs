@@ -15,3 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
+use crate::cli::args::RemoveOptions;
+use crate::errors::IgnixError;
+use crate::cli::validate::ask_user_confirmation;
+use crate::boot::{esp, disk};
+pub fn remove_ignix(options: RemoveOptions) -> Result<(), IgnixError> {
+    if !options.force {
+        ask_user_confirmation("remove")?;
+    }
+
+    let scanner = disk::DiskScanner::new(true, true); 
+    let esp_target = scanner.find_compatible_esp()?;
+
+    esp::delete_ignix_structure(&esp_target)?;
+    
+    Ok(())
+}

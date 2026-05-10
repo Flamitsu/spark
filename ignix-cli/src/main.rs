@@ -35,7 +35,7 @@ fn main(){
     }
 }
 
-/// The run function is the one that runs the program. If there is some problem it will tell it to the main function and the main function will exit the program with a message.
+/// The run function is the one that runs the program. If there is some problem it will tell it about it to the main function and the main function will exit the program with a message.
 fn run() -> Result<(), IgnixError> {
     let args: Vec<String> = env::args().collect();
     
@@ -47,6 +47,14 @@ fn run() -> Result<(), IgnixError> {
     
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
+        "install" => {
+            let options = cli::interface::parse_install_args(&args)?;
+            commands::install::install_ignix(options)?;
+        },
+        "remove" => {
+            let options = cli::interface::parse_remove_args(&args)?;
+            commands::remove::remove_ignix(options)?;
+        }
         "help" => commands::help::show_help(),
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }

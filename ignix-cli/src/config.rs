@@ -81,7 +81,7 @@ impl GptLimits {
         }
     }
 }
-const LIMITS: GptLimits = GptLimits::new(128, 128, 4096);
+pub const LIMITS: GptLimits = GptLimits::new(128, 128, 4096);
 
 // GPT HEADER OFFSETS (LBA 1)
 pub struct GptHeaderOffsets;
