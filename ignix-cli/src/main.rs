@@ -20,6 +20,8 @@ mod errors;
 #[allow(unused)]
 pub mod config; // Here is where all the consts resides centralized
 #[allow(unused)]
+pub mod boot;
+#[allow(unused)]
 mod cli;
 mod commands;
 use std::env;
