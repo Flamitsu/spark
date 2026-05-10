@@ -65,7 +65,8 @@ pub struct GptLimits{
  * Why does this have a constructor and the other ones do not? 
  * It's because parameters like the buffer size should be
  * calculated with the current config and not be hardcoded. You give the gpt_partitions (normally
- * 128), the entry_size (normally 128) and the lba_sector_size (normally 4096 or 512) */
+ * 128), the entry_size (normally 128) and the lba_sector_size (normally 4096 or 512) 
+ */
 impl GptLimits {
     const fn new(gpt_partitions: usize, partition_entry_size: usize, lba_sector_size: usize) -> Self{
         let buffer_size = (gpt_partitions * partition_entry_size) + lba_sector_size;
@@ -74,7 +75,7 @@ impl GptLimits {
             partition_entry_size: partition_entry_size,
             lba_sector_size: lba_sector_size,
             header_size: 92,
-            buffer_size,
+            buffer_size: buffer_size,
             header_part_lba: 2,
             header_part_size: 128
         }
