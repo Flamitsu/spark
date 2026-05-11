@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-use crate::config::{GptHeaderOffsets, GptEntryOffsets, GptLimits, GptSpecification, LIMITS};
+use crate::config::{GptHeaderOffsets, GptEntryOffsets, GptSpecification, LIMITS};
 use crate::errors::{IgnixError, io};
 use crate::boot::crc32::calculate_crc32;
 use std::io::{SeekFrom, Seek, Read};
@@ -93,14 +93,14 @@ pub fn get_esp_guid<const MAX_BUFFER_SIZE: usize>(
         if entry_start > MAX_BUFFER_SIZE{
             Err(io::Error::InvalidBufferOverflow { 
                 context: "Partition entry start overflows.".to_string(), 
-                found: entry_start as usize, 
+                found: entry_start, 
                 limit: MAX_BUFFER_SIZE })?
         }
         
         if entry_end > MAX_BUFFER_SIZE {
             Err(io::Error::InvalidBufferOverflow { 
                 context: "Partition entry end overflows.".to_string(),
-                found: entry_end as usize, 
+                found: entry_end, 
                 limit: MAX_BUFFER_SIZE })?
         }
         

@@ -16,7 +16,7 @@
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::fs::{read_dir, File};
-use crate::{boot::gpt, config::{self, LIMITS}};
+use crate::{boot::gpt, config::LIMITS};
 use std::path::PathBuf;
 use crate::{boot::sysfs, boot::esp, config::Routes, errors::IgnixError};
 

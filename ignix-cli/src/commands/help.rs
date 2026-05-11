@@ -21,6 +21,8 @@ USAGE:
     ignix [COMMAND] [OPTIONS]
 
 COMMANDS:
+    install     Installs ignix binary into the EFI System Partition
+    uninstall   Removes ignix binary and its configuration from the ESP
     help        Prints this help information
 
 OPTIONS:

@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-use std::path::PathBuf;
 use crate::config::{Flag, Routes};
 use crate::errors::IgnixError;
 use crate::cli::{validate, parser};

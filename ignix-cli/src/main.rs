@@ -15,13 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-#[allow(unused)]
 mod errors;
-#[allow(unused)]
 pub mod config; // Here is where all the consts resides centralized
-#[allow(unused)]
 pub mod boot;
-#[allow(unused)]
 mod cli;
 mod commands;
 use std::env;

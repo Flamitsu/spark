@@ -21,7 +21,7 @@ use crate::cli::validate::ask_user_confirmation;
 use crate::boot::{esp, disk};
 pub fn remove_ignix(options: RemoveOptions) -> Result<(), IgnixError> {
     if !options.force {
-        ask_user_confirmation("remove")?;
+        ask_user_confirmation("uninstall")?;
     }
 
     let scanner = disk::DiskScanner::new(true, true); 

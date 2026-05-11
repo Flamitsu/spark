@@ -47,7 +47,7 @@ impl GptSpecification{
     pub const ESP_GUID_SIG: [u8;16] = [0x28, 0x73, 0x2A, 0xC1,
     0x1F, 0xF8,
     0xD2, 0x11,
-    0xBa, 0x4B,
+    0xBA, 0x4B,
     0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B];
 }
 
@@ -71,11 +71,11 @@ impl GptLimits {
     const fn new(gpt_partitions: usize, partition_entry_size: usize, lba_sector_size: usize) -> Self{
         let buffer_size = (gpt_partitions * partition_entry_size) + lba_sector_size;
         Self {
-            gpt_partitions: gpt_partitions,
-            partition_entry_size: partition_entry_size,
-            lba_sector_size: lba_sector_size,
+            gpt_partitions,
+            partition_entry_size,
+            lba_sector_size,
             header_size: 92,
-            buffer_size: buffer_size,
+            buffer_size,
             header_part_lba: 2,
             header_part_size: 128
         }
