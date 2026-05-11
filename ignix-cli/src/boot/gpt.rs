@@ -27,7 +27,6 @@ pub fn is_disk_efi_signed(buffer: &[u8]) -> bool{
 pub fn validate_crc32_header_checksum<const SIZE: usize>(buffer: &[u8;SIZE],header_size: u32) -> Result<bool, IgnixError>{
     
     let size = header_size as usize;
-    // Clone function is needed because the Range<usize> parameter is used 2 times.
     let stored_crc = u32::from_le_bytes(buffer[GptHeaderOffsets::CRC].try_into()?);
     
     /* Copies only the header to change the header checksum field to 0, that is how the CRC32
@@ -117,7 +116,6 @@ pub fn get_esp_guid<const MAX_BUFFER_SIZE: usize>(
     Ok(None)
 }
 
-
 pub fn get_gpt_header_size(buffer: &[u8]) -> Result<u32, IgnixError>{
     let header_size = u32::from_le_bytes(buffer[GptHeaderOffsets::SIZE].try_into()?);
     if header_size as usize > LIMITS.header_size {
@@ -130,7 +128,6 @@ pub fn get_gpt_header_size(buffer: &[u8]) -> Result<u32, IgnixError>{
     Ok(header_size)
 }
 
-// The offsets in this slices are defined in the GPT specification.
 pub fn get_max_gpt_partition(buffer: &[u8]) -> Result<u32, IgnixError>{
     let max_partitions = u32::from_le_bytes(buffer[GptHeaderOffsets::PART_COUNT].try_into()?);
     if max_partitions as usize > LIMITS.gpt_partitions{
