@@ -19,9 +19,9 @@ use crate::boot::disk::EspPartition;
 use crate::cli::validate::ask_user_confirmation;
 use crate::config::{EspStructure, Routes};
 use crate::errors::{IgnixError, io};
-use std::fs::read_to_string;
+use std::fs::{File, read_to_string};
 use std::{fs, path::Path, path::PathBuf};
-
+use crate::utils;
 pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool, force: bool)
     -> Result<(), IgnixError> {
     let route = &esp.mountpoint;
@@ -46,7 +46,10 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
             fs::copy(efi_bin, &efi_fallback)?;
         }
     }
-
+    let mut buffer: [u8;32] = [0u8;32];
+    let source: File = File::open(Routes::RNG_SOURCE)?;
+    utils::get_random(source, &mut buffer)?;
+    std::fs::write(route.join("loader/random-seed"), buffer)?;
     Ok(())
 }
 

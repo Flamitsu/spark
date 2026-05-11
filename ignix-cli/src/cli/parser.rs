@@ -20,12 +20,13 @@ use crate::errors::cmd;
 use crate::config::Flag;
 use std::path::PathBuf;
 use crate::cli::validate;
-
-pub fn parse_prefixed_arg( arg: &str, route: &mut Option<PathBuf>, efi: &mut Option<PathBuf>) 
+#[allow(unused)]
+pub fn parse_prefixed_arg( arg: &str, efi: &mut Option<PathBuf>) 
     -> Result<(), IgnixError> {
-    if let Some(path) = arg.strip_prefix(Flag::INSTALL_ROUTE) {
+    /*if let Some(path) = arg.strip_prefix(Flag::INSTALL_ROUTE) {
         *route = Some(validate::is_valid_install_path(path)?);
-    } else if let Some(path) = arg.strip_prefix(Flag::EFI_BIN_PATH) {
+    } else */
+    if let Some(path) = arg.strip_prefix(Flag::EFI_BIN_PATH) {
         *efi = Some(validate::is_valid_efi_bin_path(path)?);
     } else {
         Err(cmd::Error::InvalidArgument(arg.to_string()))?

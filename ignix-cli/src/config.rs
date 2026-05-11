@@ -120,6 +120,8 @@ impl Routes{
     pub const LOGICAL_BLOCK_SIZE: &'static str = "queue/logical_block_size";
     // route: /proc/mounts
     pub const MOUNTPOINTS: &'static str = "/proc/mounts";
+    // route: /dev/urandom
+    pub const RNG_SOURCE: &'static str = "/dev/urandom";
 }
 
 pub struct Flag;

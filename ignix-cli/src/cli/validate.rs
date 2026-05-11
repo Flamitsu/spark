@@ -28,6 +28,7 @@ pub fn is_valid_efi_bin_path(route: &str) -> Result<PathBuf, IgnixError>{
     Ok(path)
 }
 
+#[allow(unused)]
 pub fn is_valid_install_path(route: &str) -> Result<PathBuf, IgnixError>{
     let path = PathBuf::from(route);
     if path.exists(){

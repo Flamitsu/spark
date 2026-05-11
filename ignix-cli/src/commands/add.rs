@@ -15,3 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
+use crate::errors::IgnixError;
+use crate::cli::args::AddOptions;
+pub fn add_entry(_options: AddOptions) -> Result<(), IgnixError>{
+    
+    Ok(())
+}

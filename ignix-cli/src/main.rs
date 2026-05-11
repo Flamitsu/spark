@@ -21,6 +21,7 @@ pub mod boot;
 mod cli;
 mod commands;
 use std::env;
+mod utils;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
 fn main(){
@@ -43,6 +44,10 @@ fn run() -> Result<(), IgnixError> {
     
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
+        "add" => {
+            let options = cli::interface::parse_add_args(&args)?;
+            commands::add::add_entry(options)?;
+        }
         "install" => {
             let options = cli::interface::parse_install_args(&args)?;
             commands::install::install_ignix(options)?;
@@ -50,7 +55,7 @@ fn run() -> Result<(), IgnixError> {
         "uninstall" => {
             let options = cli::interface::parse_remove_args(&args)?;
             commands::uninstall::remove_ignix(options)?;
-        }
+        },
         "help" => commands::help::show_help(),
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
     }

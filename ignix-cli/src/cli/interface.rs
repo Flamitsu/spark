@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 /*
  * Copyright (C) 2026 Flamitsu
  *
@@ -18,7 +20,8 @@
 use crate::config::{Flag, Routes};
 use crate::errors::IgnixError;
 use crate::cli::{validate, parser};
-use crate::cli::args::{InstallOptions, RemoveOptions};
+#[allow(unused)]
+use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
 
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
     
@@ -26,7 +29,6 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
     let mut allow_virtual = false;
     let mut no_nvram = false;
     let mut removable_device = false;
-    let mut install_route = None;
     let mut efi_bin_provided = None;
 
     for arg in args.iter().skip(2){
@@ -36,7 +38,7 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
             Flag::ALLOW_VIRTUAL_FLAG => allow_virtual = true,
             Flag::NO_NVRAM => no_nvram = true,
             Flag::REMOVABLE_FLAG => removable_device = true,
-            _ => parser::parse_prefixed_arg(arg, &mut install_route, &mut efi_bin_provided)?
+            _ => parser::parse_prefixed_arg(arg, &mut efi_bin_provided)?
         }
     } 
 
@@ -51,7 +53,6 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
         no_nvram,
         removable_device,
         efi_bin,
-        install_route
     })
 }
 
@@ -60,4 +61,20 @@ pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
         force: args.iter()
             .skip(2).any(|a| a == Flag::FORCE_FLAG)
     })
+}
+
+pub fn parse_add_args(_args: &[String]) -> Result<AddOptions, IgnixError>{
+    // This is just to make the compiler to shut up (not final version)
+    Ok(
+        AddOptions{
+            esp_mountpoint: PathBuf::new(),
+            title: String::new(),
+            kernel_version: String::new(),
+            machine_id: String::new(),
+            sort_key: String::new(),
+            options: String::new(),
+            linux: PathBuf::new(),
+            initrd: vec![PathBuf::new()]
+        }
+    )
 }

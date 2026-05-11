@@ -16,16 +16,26 @@
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::path::PathBuf;
-#[allow(unused)]
 pub struct InstallOptions {
     pub force: bool,
     pub allow_virtual: bool,
     pub no_nvram: bool,
     pub removable_device: bool,
     pub efi_bin: PathBuf,
-    pub install_route: Option<PathBuf>,
 }
 
 pub struct RemoveOptions {
     pub force: bool,
+}
+
+#[allow(unused)]
+pub struct AddOptions{
+    pub esp_mountpoint: PathBuf,
+    pub title: String,
+    pub kernel_version: String,
+    pub machine_id: String,
+    pub sort_key: String,
+    pub options: String,
+    pub linux: PathBuf,
+    pub initrd: Vec<PathBuf>
 }
