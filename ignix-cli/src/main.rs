@@ -47,9 +47,9 @@ fn run() -> Result<(), IgnixError> {
             let options = cli::interface::parse_install_args(&args)?;
             commands::install::install_ignix(options)?;
         },
-        "remove" => {
+        "uninstall" => {
             let options = cli::interface::parse_remove_args(&args)?;
-            commands::remove::remove_ignix(options)?;
+            commands::uninstall::remove_ignix(options)?;
         }
         "help" => commands::help::show_help(),
         _ => return Err(cmd::Error::InvalidArgument(args[1].to_string()))?
