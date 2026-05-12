@@ -17,7 +17,7 @@
  */
 use std::fs::{read_to_string, read_dir};
 use std::path::Path;
-use crate::config::DevLinuxTags;
+use crate::config::LinuxTags;
 use crate::IgnixError;
 
 pub fn get_disk_partition_uevent(device_sysfs: &Path, device: &str) -> Result<Vec<String>, IgnixError>{
@@ -59,11 +59,11 @@ pub fn get_esp_partition(device: &str, sysfs_route: &Path, partition_guid: &str)
         let mut guid_matches = false;
         
         for line in archive.lines(){
-            if let Some(value) = line.strip_prefix(DevLinuxTags::DEVNAME) {
+            if let Some(value) = line.strip_prefix(LinuxTags::DEVNAME) {
                 devname = Some(value.to_string())
-            } else if let Some(value) = line.strip_prefix(DevLinuxTags::DEVTYPE) && value == "partition"{
+            } else if let Some(value)=line.strip_prefix(LinuxTags::DEVTYPE) && value == "partition"{
                 is_partition = true
-            } else if let Some(value) = line.strip_prefix(DevLinuxTags::PARTUUID) && value == partition_guid {
+            } else if let Some(value) = line.strip_prefix(LinuxTags::PARTUUID) && value == partition_guid {
                 guid_matches = true;
             }
         }

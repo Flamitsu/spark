@@ -17,10 +17,9 @@ use std::path::PathBuf;
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-use crate::config::{Flag, Routes};
+use crate::config::{AddFlag, Flag, Routes};
 use crate::errors::IgnixError;
 use crate::cli::{validate, parser};
-#[allow(unused)]
 use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
 
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
@@ -62,8 +61,31 @@ pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
             .skip(2).any(|a| a == Flag::FORCE_FLAG)
     })
 }
+#[allow(unused)]
+pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
+    let mut esp_mountpoint = PathBuf::new();
+    let mut title: Option<String> = None;
+    let mut kernel_version: Option<String> = None;
+    let mut machine_id: Option<String> = None;
+    let mut sort_key: Option<String> = None;
+    let mut options: Option<String> = None;
+    let mut linux: Option<String> = None;
+    let mut initrd: Option<Vec<PathBuf>> = None;
 
-pub fn parse_add_args(_args: &[String]) -> Result<AddOptions, IgnixError>{
+    for arg in args.iter().skip(2){
+        match arg.as_str() {
+            AddFlag::TITLE => {
+
+                println!("");},
+            AddFlag::KERNEL_VERSION => {println!("")},
+            AddFlag::SORT_KEY => {println!("");},
+            AddFlag::OPTIONS => {println!("");},
+            AddFlag::LINUX => {println!("");},
+            AddFlag::INITRD => {println!("");},
+            _ => todo!()
+        }
+    }
+
     // This is just to make the compiler to shut up (not final version)
     Ok(
         AddOptions{

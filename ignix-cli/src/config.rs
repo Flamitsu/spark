@@ -34,11 +34,13 @@ impl EspStructure{
     pub const ESP_DIRECTORIES: [&'static str; 3] = ["EFI/BOOT", "loader/entries", "EFI/ignix"];
 }
 
-pub struct DevLinuxTags;
-impl DevLinuxTags{
+pub struct LinuxTags;
+impl LinuxTags{
     pub const DEVNAME: &'static str = "DEVNAME=";
     pub const DEVTYPE: &'static str = "DEVTYPE=";
     pub const PARTUUID: &'static str = "PARTUUID=";
+    pub const PRETTY_NAME: &'static str = "PRETTY_NAME=";
+    pub const OS_ID: &'static str = "ID=";
 }
 
 pub struct GptSpecification;
@@ -122,6 +124,10 @@ impl Routes{
     pub const MOUNTPOINTS: &'static str = "/proc/mounts";
     // route: /dev/urandom
     pub const RNG_SOURCE: &'static str = "/dev/urandom";
+    // route: /proc/cmdline
+    pub const CMDLINE: &'static str = "/proc/cmdline";
+    // route: /etc/os-release
+    pub const OS_RELEASE: &'static str = "/etc/os-release";
 }
 
 pub struct Flag;
@@ -132,4 +138,14 @@ impl Flag {
     pub const INSTALL_ROUTE: &'static str = "--install-route=";
     pub const EFI_BIN_PATH: &'static str = "--efi-bin=";
     pub const REMOVABLE_FLAG: &'static str = "--removable";
+}
+
+pub struct AddFlag;
+impl AddFlag{
+    pub const TITLE: &'static str = "--title=";
+    pub const KERNEL_VERSION: &'static str = "--kernel=";
+    pub const SORT_KEY: &'static str = "--sort-key=";
+    pub const OPTIONS: &'static str = "--options";
+    pub const LINUX: &'static str = "--linux=";
+    pub const INITRD: &'static str = "--initrd=";
 }
