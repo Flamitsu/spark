@@ -25,7 +25,6 @@ use crate::utils;
 pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool, force: bool)
     -> Result<(), IgnixError> {
     let route = &esp.mountpoint;
-
     let efi_fallback = route.join("EFI/BOOT/BOOTX64.efi");
     
     if efi_fallback.exists() && no_nvram && !force {
@@ -38,18 +37,20 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
             fs::create_dir_all(&dir_route)?;
         }
         
-        if dir.ends_with("ignix/") {
+        if dir.ends_with("ignix") {
             fs::copy(efi_bin, dir_route.join("ignixx64.efi"))?;
         }
         
-        if dir.ends_with("BOOT/") {
+        if dir.ends_with("BOOT") {
             fs::copy(efi_bin, &efi_fallback)?;
         }
     }
+
     let mut buffer: [u8;32] = [0u8;32];
     let source: File = File::open(Routes::RNG_SOURCE)?;
     utils::get_random(source, &mut buffer)?;
     std::fs::write(route.join("loader/random-seed"), buffer)?;
+    
     Ok(())
 }
 

@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 /*
  * Copyright (C) 2026 Flamitsu
  *
@@ -21,7 +19,7 @@ use crate::config::{AddFlag, Flag, Routes};
 use crate::errors::IgnixError;
 use crate::cli::{validate, parser};
 use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
-
+use std::path::PathBuf;
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
     
     let mut force = false;
