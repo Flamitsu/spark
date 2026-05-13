@@ -16,7 +16,7 @@
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
 use crate::config::{AddFlag, Flag, Routes};
-use crate::errors::IgnixError;
+use crate::errors::{IgnixError, cmd};
 use crate::cli::{validate, parser};
 use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
 use std::path::PathBuf;
@@ -59,6 +59,7 @@ pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
             .skip(2).any(|a| a == Flag::FORCE_FLAG)
     })
 }
+
 #[allow(unused)]
 pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
     let mut esp_mountpoint = PathBuf::new();
@@ -68,22 +69,43 @@ pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
     let mut sort_key: Option<String> = None;
     let mut options: Option<String> = None;
     let mut linux: Option<String> = None;
-    let mut initrd: Option<Vec<PathBuf>> = None;
+    let mut initrd: Vec<PathBuf> = Vec::new();
 
     for arg in args.iter().skip(2){
         match arg.as_str() {
             AddFlag::TITLE => {
-
-                println!("");},
-            AddFlag::KERNEL_VERSION => {println!("")},
-            AddFlag::SORT_KEY => {println!("");},
-            AddFlag::OPTIONS => {println!("");},
-            AddFlag::LINUX => {println!("");},
-            AddFlag::INITRD => {println!("");},
-            _ => todo!()
+                if let Some(arg_title) = arg.strip_prefix(AddFlag::TITLE){
+                    title = Some(String::from(arg_title));
+                }
+            },
+            AddFlag::KERNEL_VERSION => {
+                if let Some(arg_kernel_version) = arg.strip_prefix(AddFlag::KERNEL_VERSION){
+                    kernel_version = Some(String::from(arg_kernel_version))
+                }
+            },
+            AddFlag::SORT_KEY => {
+                if let Some(arg_sort_key) = arg.strip_prefix(AddFlag::SORT_KEY){
+                    sort_key = Some(String::from(arg_sort_key))
+                }
+            },
+            AddFlag::OPTIONS => {
+                if let Some(arg_options) = arg.strip_prefix(AddFlag::OPTIONS){
+                    options = Some(String::from(arg_options))
+                }
+            },
+            AddFlag::LINUX => {
+                if let Some(arg_linux) = arg.strip_prefix(AddFlag::LINUX){
+                    linux = Some(String::from(arg_linux))
+                }
+            },
+            AddFlag::INITRD => {
+                if let Some(arg_initrd) = arg.strip_prefix(AddFlag::INITRD){
+                    initrd.push(PathBuf::from(arg_initrd));
+                }
+            },
+            _ => Err(cmd::Error::InvalidArgument(arg.to_string()))?
         }
     }
-
     // This is just to make the compiler to shut up (not final version)
     Ok(
         AddOptions{
