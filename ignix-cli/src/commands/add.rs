@@ -18,6 +18,5 @@
 use crate::errors::IgnixError;
 use crate::cli::args::AddOptions;
 pub fn add_entry(_options: AddOptions) -> Result<(), IgnixError>{
-    
     Ok(())
 }

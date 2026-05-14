@@ -16,10 +16,9 @@
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
 use std::fs::{read_dir, File};
-use crate::{boot::gpt, config::LIMITS};
+use crate::{boot::gpt, config::LIMITS, utils};
 use std::path::PathBuf;
 use crate::{boot::sysfs, boot::esp, config::Routes, errors::IgnixError};
-
 pub struct EspPartition{
     pub device_name: String,
     pub mountpoint: PathBuf,
@@ -75,7 +74,7 @@ impl DiskScanner {
                 continue; 
             };
 
-            let guid_string = gpt::format_partuuid(&part_guid)?;
+            let guid_string = utils::format_uuid(&part_guid)?;
         
             let Some(partition_name) = sysfs::get_esp_partition(&device, &disk_sysfs_route, &guid_string)? else {
                 continue;

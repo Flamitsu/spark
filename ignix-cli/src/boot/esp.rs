@@ -20,8 +20,9 @@ use crate::cli::validate::ask_user_confirmation;
 use crate::config::{EspStructure, Routes};
 use crate::errors::{IgnixError, io};
 use std::fs::{File, read_to_string};
+use std::io::Write;
 use std::{fs, path::Path, path::PathBuf};
-use crate::utils;
+use crate::utils::{self, setup_machine_id};
 pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool, force: bool)
     -> Result<(), IgnixError> {
     let route = &esp.mountpoint;
@@ -37,7 +38,7 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
             fs::create_dir_all(&dir_route)?;
         }
         
-        if dir.ends_with("ignix") {
+        if dir.ends_with("EFI/ignix") {
             fs::copy(efi_bin, dir_route.join("ignixx64.efi"))?;
         }
         
@@ -46,11 +47,26 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
         }
     }
 
-    let mut buffer: [u8;32] = [0u8;32];
+    let mut random_seed: [u8;32] = [0u8;32];
     let source: File = File::open(Routes::RNG_SOURCE)?;
-    utils::get_random(source, &mut buffer)?;
-    std::fs::write(route.join("loader/random-seed"), buffer)?;
-    
+    utils::get_random(source, &mut random_seed)?;
+    fs::write(route.join("loader/random-seed"), random_seed)?;
+    let entries_route = route.join(setup_machine_id()?);
+    if !entries_route.exists(){
+        fs::create_dir(entries_route)?;
+    }
+
+    let ignix_dir = route.join("loader/ignix");
+    let config_path = ignix_dir.join("loader.conf");
+    if !config_path.exists() {
+        let mut file = File::create_new(ignix_dir.join("loader.conf.tmp"))?;
+        file.write_all(EspStructure::LOADER_CONFIG.as_bytes())?;
+        file.sync_all()?;
+        fs::rename(ignix_dir.join("loader.conf.tmp"), config_path)?;
+        let dir = File::open(route.join("loader/ignix"))?;
+        dir.sync_all()?;
+    }
+
     Ok(())
 }
 
@@ -62,9 +78,9 @@ pub fn delete_ignix_structure(esp: &EspPartition) -> Result<(), IgnixError> {
         fs::remove_dir_all(bootloader_home)?;
     }
 
-    let config_home = route.join("loader/ignix.conf");
+    let config_home = route.join("loader/ignix");
     if config_home.exists() {
-        fs::remove_file(config_home)?;
+        fs::remove_dir_all(config_home)?;
     }
     Ok(())
 }

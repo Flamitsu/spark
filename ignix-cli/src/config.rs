@@ -31,9 +31,9 @@ use std::ops::Range;
 
 pub struct EspStructure;
 impl EspStructure{
-    pub const ESP_DIRECTORIES: [&'static str; 3] = ["EFI/BOOT", "loader/entries", "EFI/ignix"];
+    pub const ESP_DIRECTORIES: [&'static str; 4] = ["EFI/BOOT", "loader/entries", "EFI/ignix", "loader/ignix/"];
+    pub const LOADER_CONFIG: &'static str = "#timeout 3\n#console-mode keep";
 }
-
 pub struct LinuxTags;
 impl LinuxTags{
     pub const DEVNAME: &'static str = "DEVNAME=";
@@ -128,6 +128,14 @@ impl Routes{
     pub const CMDLINE: &'static str = "/proc/cmdline";
     // route: /etc/os-release
     pub const OS_RELEASE: &'static str = "/etc/os-release";
+    // route: /etc/machine-id
+    pub const ETC_MACHINE_ID: &'static str = "/etc/machine-id";
+    // route: /var/lib/dbus/machine-id 
+    pub const DBUS_MACHINE_ID: &'static str = "/var/lib/dbus/machine-id";
+    
+    // Atomicall operations
+    pub const AT_DEFAULT_EFI_BIN_PATH: &'static str = "/usr/lib/ignix/ignixx64.efi.tmp";
+    pub const AT_ETC_MACHINE_ID: &'static str = "/etc/machine-id.tmp";
 }
 
 pub struct Flag;
@@ -142,10 +150,7 @@ impl Flag {
 
 pub struct AddFlag;
 impl AddFlag{
-    pub const TITLE: &'static str = "--title=";
     pub const KERNEL_VERSION: &'static str = "--kernel=";
-    pub const SORT_KEY: &'static str = "--sort-key=";
-    pub const OPTIONS: &'static str = "--options";
     pub const LINUX: &'static str = "--linux=";
     pub const INITRD: &'static str = "--initrd=";
 }

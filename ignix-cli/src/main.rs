@@ -41,7 +41,6 @@ fn run() -> Result<(), IgnixError> {
         commands::help::show_help();
         return Ok(());
     }
-    
     // Converts the second argument into string and starts matching
     match args[1].as_str() {
         "add" => {

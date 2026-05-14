@@ -22,6 +22,7 @@ pub enum Error {
     InvalidArgument(String),
     UserAborted,
     NotEFIPartitionFound,
+    KeyValueMissing(String, String),
 }
 
 impl std::fmt::Display for Error {
@@ -30,6 +31,7 @@ impl std::fmt::Display for Error {
             Error::InvalidArgument(arg) => write!(f, "Invalid argument: {}", arg),
             Error::UserAborted => write!(f, "User aborted the process."),
             Error::NotEFIPartitionFound => write!(f, "Not UEFI partition found in the system."),
+            Error::KeyValueMissing(arg, file) => write!(f, "Missing {} value in {}", arg,file), 
         }
     }
 }

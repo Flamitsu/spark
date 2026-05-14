@@ -30,12 +30,11 @@ pub struct RemoveOptions {
 
 #[allow(unused)]
 pub struct AddOptions{
-    pub esp_mountpoint: PathBuf,
     pub title: String,
     pub kernel_version: String,
     pub machine_id: String,
     pub sort_key: String,
     pub options: String,
-    pub linux: PathBuf,
-    pub initrd: Vec<PathBuf>
+    pub linux: String,
+    pub initrd: Vec<String>
 }

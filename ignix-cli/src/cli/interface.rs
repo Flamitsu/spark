@@ -19,7 +19,7 @@ use crate::config::{AddFlag, Flag, Routes};
 use crate::errors::{IgnixError, cmd};
 use crate::cli::{validate, parser};
 use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
-use std::path::PathBuf;
+use crate::utils::SystemInfo;
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
     
     let mut force = false;
@@ -62,35 +62,15 @@ pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
 
 #[allow(unused)]
 pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
-    let mut esp_mountpoint = PathBuf::new();
-    let mut title: Option<String> = None;
     let mut kernel_version: Option<String> = None;
-    let mut machine_id: Option<String> = None;
-    let mut sort_key: Option<String> = None;
-    let mut options: Option<String> = None;
     let mut linux: Option<String> = None;
-    let mut initrd: Vec<PathBuf> = Vec::new();
+    let mut initrd: Vec<String> = Vec::new();
 
     for arg in args.iter().skip(2){
         match arg.as_str() {
-            AddFlag::TITLE => {
-                if let Some(arg_title) = arg.strip_prefix(AddFlag::TITLE){
-                    title = Some(String::from(arg_title));
-                }
-            },
             AddFlag::KERNEL_VERSION => {
                 if let Some(arg_kernel_version) = arg.strip_prefix(AddFlag::KERNEL_VERSION){
                     kernel_version = Some(String::from(arg_kernel_version))
-                }
-            },
-            AddFlag::SORT_KEY => {
-                if let Some(arg_sort_key) = arg.strip_prefix(AddFlag::SORT_KEY){
-                    sort_key = Some(String::from(arg_sort_key))
-                }
-            },
-            AddFlag::OPTIONS => {
-                if let Some(arg_options) = arg.strip_prefix(AddFlag::OPTIONS){
-                    options = Some(String::from(arg_options))
                 }
             },
             AddFlag::LINUX => {
@@ -100,23 +80,32 @@ pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
             },
             AddFlag::INITRD => {
                 if let Some(arg_initrd) = arg.strip_prefix(AddFlag::INITRD){
-                    initrd.push(PathBuf::from(arg_initrd));
+                    initrd.push(String::from(arg_initrd));
                 }
             },
             _ => Err(cmd::Error::InvalidArgument(arg.to_string()))?
         }
     }
+    let linux = match linux {
+        Some(value) => value,
+        None => Err(cmd::Error::KeyValueMissing("linux path".into(), "CLI arguments".into()))?
+    };
+    let kernel_version = match kernel_version {
+        Some(value) => value,
+        None => Err(cmd::Error::KeyValueMissing("kernel version".into(), "CLI arguments".into()))?
+    };
+    
+    let os_info: SystemInfo = SystemInfo::new()?;
     // This is just to make the compiler to shut up (not final version)
     Ok(
         AddOptions{
-            esp_mountpoint: PathBuf::new(),
-            title: String::new(),
-            kernel_version: String::new(),
-            machine_id: String::new(),
-            sort_key: String::new(),
-            options: String::new(),
-            linux: PathBuf::new(),
-            initrd: vec![PathBuf::new()]
+            title: os_info.title,
+            kernel_version,
+            machine_id: os_info.machine_id,
+            sort_key: os_info.sort_key,
+            options: os_info.options,
+            linux,
+            initrd
         }
     )
 }
