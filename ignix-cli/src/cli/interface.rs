@@ -24,7 +24,7 @@ pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>
     
     let mut force = false;
     let mut allow_virtual = false;
-    let mut no_nvram = false;
+    let mut no_nvram = true;
     let mut removable_device = false;
     let mut efi_bin_provided = None;
 
@@ -60,30 +60,19 @@ pub fn parse_remove_args(args: &[String]) -> Result<RemoveOptions, IgnixError>{
     })
 }
 
-#[allow(unused)]
 pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
     let mut kernel_version: Option<String> = None;
     let mut linux: Option<String> = None;
     let mut initrd: Vec<String> = Vec::new();
-
-    for arg in args.iter().skip(2){
-        match arg.as_str() {
-            AddFlag::KERNEL_VERSION => {
-                if let Some(arg_kernel_version) = arg.strip_prefix(AddFlag::KERNEL_VERSION){
-                    kernel_version = Some(String::from(arg_kernel_version))
-                }
-            },
-            AddFlag::LINUX => {
-                if let Some(arg_linux) = arg.strip_prefix(AddFlag::LINUX){
-                    linux = Some(String::from(arg_linux))
-                }
-            },
-            AddFlag::INITRD => {
-                if let Some(arg_initrd) = arg.strip_prefix(AddFlag::INITRD){
-                    initrd.push(String::from(arg_initrd));
-                }
-            },
-            _ => Err(cmd::Error::InvalidArgument(arg.to_string()))?
+    for arg in args.iter().skip(2) {
+        if let Some(val) = arg.strip_prefix(AddFlag::KERNEL_VERSION) {
+            kernel_version = Some(val.to_string());
+        } else if let Some(val) = arg.strip_prefix(AddFlag::LINUX) {
+            linux = Some(val.to_string());
+        } else if let Some(val) = arg.strip_prefix(AddFlag::INITRD) {
+            initrd.push(val.to_string());
+        } else {
+            return Err(cmd::Error::InvalidArgument(arg.to_string()).into());
         }
     }
     let linux = match linux {

@@ -25,14 +25,13 @@ pub fn get_random<SOURCE: Read>(mut entropy_source: SOURCE, buffer: &mut [u8])
     Ok(())
 }
 
-#[allow(unused)]
 pub struct SystemInfo{
     pub options: String,
     pub title: String,
     pub sort_key: String,
     pub machine_id: String,
 }
-#[allow(unused)]
+
 impl SystemInfo{
     pub fn new() -> Result<SystemInfo, IgnixError>{
         let options: String = Self::filter_cmdline(&read_to_string(Routes::CMDLINE)?); 
