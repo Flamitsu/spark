@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Copyright (C) 2026 Flamitsu
+#
+# This file is part of Ignix.
+#
+# Ignix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# Ignix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+# This script is shorter because it uses the kernel-install tool.
+# Should be located in /etc/kernel/install.d/
+
+BIN="/usr/bin/ignix"
+
+if ! command -v "$BIN" &> /dev/null; then
+    echo "Error: Could not find '$BIN'." >&2
+    exit 1
+fi
+
+if [ "$1" != "add" ]; then
+    exit 0
+fi
+
+KERNEL_VERSION="$2"
+GENTOO_ESP_DIR="$3"
+
+INITRD_ARGS=""
+
+if [ -f "${GENTOO_ESP_DIR}/microcode-intel" ]; then
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${KERNEL_VERSION}/microcode-intel"
+fi
+
+if [ -f "${GENTOO_ESP_DIR}/microcode-amd" ]; then
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${KERNEL_VERSION}/microcode-amd"
+fi
+
+if [ -f "${GENTOO_ESP_DIR}/initrd" ]; then
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${KERNEL_VERSION}/initrd"
+fi
+
+$BIN add \
+    --kernel="${KERNEL_VERSION}" \
+    --linux="/${KERNEL_VERSION}/linux" \
+    $INITRD_ARGS

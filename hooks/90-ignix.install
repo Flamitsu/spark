@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2026 Flamitsu
+#
+# This file is part of Ignix.
+#
+# Ignix is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# Ignix is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+# This script file is made for the old 'installkernel'. That is why it's way larger.
+# The script should be located in /etc/kernel/postinst.d/
+
+BIN="/usr/bin/ignix"
+
+if ! command -v "$BIN" &> /dev/null; then
+    echo "Error: Could not find '$BIN'." >&2
+    exit 1
+fi
+
+KERNEL_VERSION="$1"
+KERNEL_IMAGE="$2"
+
+if [ -z "$KERNEL_VERSION" ] || [ -z "$KERNEL_IMAGE" ]; then
+    echo "Error: missing KERNEL_VERSION or KERNEL_IMAGE." >&2
+    exit 1
+fi
+
+MACHINE_ID=$($BIN hook --get-machine-id)
+ESP_MOUNT=$($BIN hook --get-esp-mountpoint)
+
+if [ -z "$MACHINE_ID" ] || [ -z "$ESP_MOUNT" ]; then
+    echo "Error: Could not retrieve MACHINE_ID or ESP_MOUNT from ignix." >&2
+    exit 1
+fi
+
+TARGET_DIR="${ESP_MOUNT}/${MACHINE_ID}/${KERNEL_VERSION}"
+mkdir -p "${TARGET_DIR}"
+
+if [ ! "$KERNEL_IMAGE" -ef "${TARGET_DIR}/linux" ]; then
+    cp "$KERNEL_IMAGE" "${TARGET_DIR}/linux"
+fi
+
+INITRD_ARGS=""
+
+if [ -f "/boot/intel-ucode.img" ]; then
+    if [ ! "/boot/intel-ucode.img" -ef "${TARGET_DIR}/intel-ucode" ]; then
+        cp "/boot/intel-ucode.img" "${TARGET_DIR}/intel-ucode"
+    fi
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/intel-ucode"
+fi
+
+if [ -f "/boot/amd-ucode.img" ]; then
+    if [ ! "/boot/amd-ucode.img" -ef "${TARGET_DIR}/amd-ucode" ]; then
+        cp "/boot/amd-ucode.img" "${TARGET_DIR}/amd-ucode"
+    fi
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/amd-ucode"
+fi
+
+FOUND_INITRD=""
+for path in "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}.img" \
+            "${KERNEL_IMAGE%/*}/initrd.img-${KERNEL_VERSION}" \
+            "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}"; do
+    if [ -f "$path" ]; then
+        FOUND_INITRD="$path"
+        break
+    fi
+done
+
+if [ -n "$FOUND_INITRD" ]; then
+    if [ ! "$FOUND_INITRD" -ef "${TARGET_DIR}/initrd" ]; then
+        cp "$FOUND_INITRD" "${TARGET_DIR}/initrd"
+    fi
+    INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/initrd"
+fi
+
+UEFI_LINUX_PATH="/${MACHINE_ID}/${KERNEL_VERSION}/linux"
+
+$BIN add \
+    --kernel="${KERNEL_VERSION}" \
+    --linux="${UEFI_LINUX_PATH}" \
+    $INITRD_ARGS
