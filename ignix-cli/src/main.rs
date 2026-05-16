@@ -51,6 +51,7 @@ fn run() -> Result<(), IgnixError> {
             let options = cli::interface::parse_install_args(&args)?;
             commands::install::install_ignix(options)?;
         },
+        "locate-esp" => print!("{}",commands::locate_esp::locate_esp()?),
         "uninstall" => {
             let options = cli::interface::parse_remove_args(&args)?;
             commands::uninstall::remove_ignix(options)?;
