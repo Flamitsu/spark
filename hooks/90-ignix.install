@@ -46,30 +46,31 @@ fi
 TARGET_DIR="${ESP_MOUNT}/${MACHINE_ID}/${KERNEL_VERSION}"
 mkdir -p "${TARGET_DIR}"
 
-if [ ! "$KERNEL_IMAGE" -ef "${TARGET_DIR}/linux" ]; then
-    cp "$KERNEL_IMAGE" "${TARGET_DIR}/linux"
+if [ -f "$KERNEL_IMAGE" ]; then
+    mv "$KERNEL_IMAGE" "${TARGET_DIR}/linux"
+else
+    echo "Error: Kernel image not found at $KERNEL_IMAGE" >&2
+    exit 1
 fi
 
 INITRD_ARGS=""
 
-if [ -f "/boot/intel-ucode.img" ]; then
-    if [ ! "/boot/intel-ucode.img" -ef "${TARGET_DIR}/intel-ucode" ]; then
-        cp "/boot/intel-ucode.img" "${TARGET_DIR}/intel-ucode"
+for ucode in "intel-uc.img" "intel-ucode.img" "amd-ucode.img" "amd-uc.img"; do
+    if [ -f "$ESP_MOUNT/${ucode}" ]; then
+        case "$ucode" in
+            intel*) dst_name="intel-ucode" ;;
+            amd*)   dst_name="amd-ucode" ;;
+        esac
+        mv "$ESP_MOUNT/${ucode}" "${TARGET_DIR}/${dst_name}"
+        INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/${dst_name}"
     fi
-    INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/intel-ucode"
-fi
-
-if [ -f "/boot/amd-ucode.img" ]; then
-    if [ ! "/boot/amd-ucode.img" -ef "${TARGET_DIR}/amd-ucode" ]; then
-        cp "/boot/amd-ucode.img" "${TARGET_DIR}/amd-ucode"
-    fi
-    INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/amd-ucode"
-fi
+done
 
 FOUND_INITRD=""
 for path in "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}.img" \
             "${KERNEL_IMAGE%/*}/initrd.img-${KERNEL_VERSION}" \
-            "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}"; do
+            "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}" \
+            "$ESP_MOUNT/initramfs-${KERNEL_VERSION}.img"; do
     if [ -f "$path" ]; then
         FOUND_INITRD="$path"
         break
@@ -77,10 +78,15 @@ for path in "${KERNEL_IMAGE%/*}/initramfs-${KERNEL_VERSION}.img" \
 done
 
 if [ -n "$FOUND_INITRD" ]; then
-    if [ ! "$FOUND_INITRD" -ef "${TARGET_DIR}/initrd" ]; then
-        cp "$FOUND_INITRD" "${TARGET_DIR}/initrd"
-    fi
+    mv "$FOUND_INITRD" "${TARGET_DIR}/initrd"
     INITRD_ARGS="${INITRD_ARGS} --initrd=/${MACHINE_ID}/${KERNEL_VERSION}/initrd"
+fi
+
+if [ -f "$ESP_MOUNT/System.map-${KERNEL_VERSION}" ]; then
+    rm "$ESP_MOUNT/System.map-${KERNEL_VERSION}"
+fi
+if [ -f "$ESP_MOUNT/config-${KERNEL_VERSION}" ]; then
+    rm "$ESP_MOUNT/config-${KERNEL_VERSION}"
 fi
 
 UEFI_LINUX_PATH="/${MACHINE_ID}/${KERNEL_VERSION}/linux"
