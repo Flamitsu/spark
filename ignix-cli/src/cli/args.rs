@@ -38,3 +38,11 @@ pub struct AddOptions{
     pub linux: String,
     pub initrd: Vec<String>
 }
+/*
+ * This is because the bash hook needs to know the esp mountpoint and i refuse to
+ * depend on findmnt etc. That is why i added a new flag named "hook"
+*/
+pub struct HookHelp{
+    pub get_machine_id: bool,
+    pub get_esp_mountpoint: bool,
+}

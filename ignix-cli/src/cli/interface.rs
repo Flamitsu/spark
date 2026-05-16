@@ -18,7 +18,7 @@
 use crate::config::{AddFlag, Flag, Routes};
 use crate::errors::{IgnixError, cmd};
 use crate::cli::{validate, parser};
-use crate::cli::args::{InstallOptions, RemoveOptions, AddOptions};
+use crate::cli::args::{AddOptions, HookHelp, InstallOptions, RemoveOptions};
 use crate::utils::SystemInfo;
 pub fn parse_install_args(args: &[String]) -> Result<InstallOptions, IgnixError>{
     
@@ -97,4 +97,19 @@ pub fn parse_add_args(args: &[String]) -> Result<AddOptions, IgnixError>{
             initrd
         }
     )
+}
+pub fn parse_hook_args(args: &[String]) -> Result<HookHelp,IgnixError>{
+    for arg in args.iter().skip(2){
+        match arg.as_str() {
+            "--get-machine-id" => { 
+                return Ok(
+                    HookHelp { get_machine_id: true, get_esp_mountpoint: false}
+                    );},
+            "--get-esp-mountpoint" => { return Ok(
+                HookHelp { get_machine_id: false, get_esp_mountpoint: true}
+            );},
+            _ => Err(cmd::Error::InvalidArgument(arg.to_string()))?
+        }
+    }
+    Err(cmd::Error::InvalidArgument("too short arguments for hook flag".into()))?
 }

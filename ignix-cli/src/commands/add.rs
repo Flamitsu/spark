@@ -56,7 +56,5 @@ pub fn add_entry(options: AddOptions) -> Result<(), IgnixError> {
 
     let dir = File::open(&entries_route)?;
     dir.sync_all()?;
-
-    println!("Entry created at: {:?}", file_path);
     Ok(())
 }

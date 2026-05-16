@@ -22,6 +22,7 @@ mod cli;
 mod commands;
 use std::env;
 mod utils;
+use crate::cli::interface::parse_hook_args;
 use crate::errors::IgnixError;
 use crate::errors::cmd;
 fn main(){
@@ -36,12 +37,12 @@ fn main(){
 fn run() -> Result<(), IgnixError> {
     let args: Vec<String> = env::args().collect();
     
-    // If there is not any argument, it will show the help.
+    // If there is not any argument, it will show the help. (ignix 1 [argument] 2)
     if args.len() < 2{
         commands::help::show_help();
         return Ok(());
     }
-    // Converts the second argument into string and starts matching
+
     match args[1].as_str() {
         "add" => {
             let options = cli::interface::parse_add_args(&args)?;
@@ -51,7 +52,10 @@ fn run() -> Result<(), IgnixError> {
             let options = cli::interface::parse_install_args(&args)?;
             commands::install::install_ignix(options)?;
         },
-        "locate-esp" => print!("{}",commands::locate_esp::locate_esp()?),
+        "hook" => {
+            let options = parse_hook_args(&args)?;
+            println!("{}",commands::hook::help_hooks(options)?);
+        },
         "uninstall" => {
             let options = cli::interface::parse_remove_args(&args)?;
             commands::uninstall::remove_ignix(options)?;

@@ -81,7 +81,7 @@ impl SystemInfo{
                 filtered_cmdline.push_str(arg);
             }
         }
-        return filtered_cmdline;
+        filtered_cmdline
     }
 }
 /// First tries to get the machine id with ETC_MACHINE_ID or DBUS_MACHINE_ID, if isn't succesful,

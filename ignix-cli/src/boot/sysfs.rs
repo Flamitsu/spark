@@ -80,17 +80,34 @@ pub fn get_disk_sector_size(disk: &Path, lba_size_route: &str) -> Result<u64, Ig
     Ok(value)
 }
 
-pub fn is_virtual_device(device: &Path) -> Result<bool, IgnixError>{
+pub fn is_virtual_device(device: &Path) -> Result<bool, IgnixError> {
     if device.join("device").exists() {
         return Ok(false);
     }
-    Ok(true)
+    if device.to_string_lossy().contains("/virtual/") {
+        return Ok(true);
+    }
+    Ok(false)
 }
 
-pub fn is_removable_device(device: &Path) -> Result<bool, IgnixError>{
-    let content = read_to_string(device.join("removable"))?;
-    if content.trim() == "0"{
-        return Ok(false)
+pub fn is_removable_device(device: &Path) -> Result<bool, IgnixError> {
+    let removable_path = device.join("removable");
+    let final_path = if removable_path.exists() {
+        removable_path
+    } else if let Some(parent) = device.parent() {
+        parent.join("removable")
+    } else {
+        removable_path
+    };
+
+    match read_to_string(final_path) {
+        Ok(content) => {
+            if content.trim() == "1" {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(_) => Ok(false), 
     }
-    Ok(true)
 }
