@@ -26,7 +26,7 @@ use crate::utils::{self, setup_machine_id};
 pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool, force: bool)
     -> Result<(), IgnixError> {
     let route = &esp.mountpoint;
-    let efi_fallback = route.join("EFI/BOOT/BOOTX64.efi");
+    let efi_fallback = route.join("EFI/BOOT/");
     
     if efi_fallback.exists() && no_nvram && !force {
         ask_user_confirmation("remove the BOOTX64.efi old binary to replace it with ignix one")?;
@@ -39,11 +39,13 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
         }
         
         if dir.ends_with("EFI/ignix") {
-            fs::copy(efi_bin, dir_route.join("ignixx64.efi"))?;
+            fs::copy(efi_bin, dir_route.join("ignixx64.efi.tmp"))?;
+            fs::rename(dir_route.join("ignixx64.efi.tmp"), dir_route.join("ignixx64.efi"))?;
         }
         
         if dir.ends_with("BOOT") {
-            fs::copy(efi_bin, &efi_fallback)?;
+            fs::copy(efi_bin, &efi_fallback.join("BOOTX64.efi.tmp"))?;
+            fs::rename(&efi_fallback.join("BOOTX64.efi.tmp"), &efi_fallback.join("BOOTX64.efi"))?;
         }
     }
 
@@ -63,10 +65,9 @@ pub fn create_ignix_structure(esp: &EspPartition, efi_bin: &Path, no_nvram: bool
         file.write_all(EspStructure::LOADER_CONFIG.as_bytes())?;
         file.sync_all()?;
         fs::rename(ignix_dir.join("loader.conf.tmp"), config_path)?;
-        let dir = File::open(route.join("loader/ignix"))?;
-        dir.sync_all()?;
     }
-
+    let dir = File::open(route)?;
+    dir.sync_all()?;
     Ok(())
 }
 
