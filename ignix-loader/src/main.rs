@@ -19,8 +19,12 @@
 #![no_main]
 #![allow(unused)]
 mod panic_handler;
+
+type EfiStatus = usize;
+
 #[unsafe(no_mangle)]
-pub extern "C" fn main() -> ! {
-    loop {}
+// This is because extern "C" follows the System V, not the ms_abi (needed for an UEFI app)
+extern "efiapi" fn main() -> EfiStatus {
+    0
 }
 
