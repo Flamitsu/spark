@@ -17,13 +17,10 @@
  */
 #![no_std]
 #![no_main]
-#![allow(unused)]
-mod panic_handler;
-mod uefi;
-use uefi::Status;
 
-#[unsafe(no_mangle)]
-// This is because extern "C" follows the System V, not the ms_abi (needed for an UEFI app)
-extern "efiapi" fn efi_main() -> Status { 
+use uefi::{Status, entry};
+
+#[entry]
+fn main() -> Status{
     Status::SUCCESS
 }
