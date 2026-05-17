@@ -17,9 +17,10 @@
  */
 #![no_std]
 #![no_main]
-
-use uefi::{Status, entry};
-#[entry]
-fn main() -> Status{
-    Status::SUCCESS
+#![allow(unused)]
+mod panic_handler;
+#[unsafe(no_mangle)]
+pub extern "C" fn main() -> ! {
+    loop {}
 }
+
