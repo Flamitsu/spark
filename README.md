@@ -32,7 +32,7 @@
 
 - [ ] Modifying the NVRAM variables successfully
 
-- [ ] Generating operating system entries
+- [X] Generating operating system entries
 
 - [ ] Supporting custom signatures of the binary
 ### TODO (ignix-loader):
