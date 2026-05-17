@@ -87,5 +87,3 @@ After the installation process is complete, you need to run the following comman
 To contribute to this project you should look at the [contributing guidelines](https://github.com/Flamitsu/ignix/blob/main/CONTRIBUTING.md) first.
 ## License
 This project is licensed under the [GPL-3.0](https://github.com/Flamitsu/ignix/blob/main/LICENSE)
-## Credits
-- [uefi](https://github.com/rust-osdev/uefi-rs/tree/main) - Crate to interact with the UEFI in Rust.

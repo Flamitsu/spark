@@ -1,5 +1,0 @@
-macro_rules! println {
-    () => {
-        
-    };
-}
