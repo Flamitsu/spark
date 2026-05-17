@@ -19,12 +19,14 @@
 #![no_main]
 #![allow(unused)]
 mod panic_handler;
-
+mod macros;
+use core::error::Error;
+use core::ffi::c_void;
 type EfiStatus = usize;
-
+use core::result::Result;
 #[unsafe(no_mangle)]
 // This is because extern "C" follows the System V, not the ms_abi (needed for an UEFI app)
-extern "efiapi" fn main() -> EfiStatus {
+pub extern "efiapi" fn efi_main() -> EfiStatus {
     0
 }
 
