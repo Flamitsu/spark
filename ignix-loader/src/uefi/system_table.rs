@@ -16,7 +16,34 @@
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
 use crate::uefi::header::HeaderTable;
+use core::ffi::c_void;
+// Code that is with '*mut c_void' is for structure normally. Don't even think of trying them!
 #[allow(unused)]
+#[repr(C)]
 pub struct SystemTable{
-    hdr: HeaderTable
+    hdr: HeaderTable,
+    // structure 
+    firmware_vendor: *mut c_void,
+    // structure
+    firmware_revision: *mut c_void,
+    // structure
+    console_in_handle: *mut c_void,
+    // structure
+    con_in: *mut c_void,
+    // structure
+    console_out_handle: *mut c_void,
+    // structure
+    con_out: *mut c_void,
+    // structure
+    standard_error_handle: *mut c_void,
+    // structure
+    std_err: *mut c_void,
+    // structure
+    runtime_services: *mut c_void,
+    // structure
+    boot_services: *mut c_void,
+    // structure
+    number_of_table_entries: usize,
+    // structure
+    configuration_table: *mut c_void,
 }
