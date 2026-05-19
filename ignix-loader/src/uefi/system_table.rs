@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-#[repr(transparent)]
-pub struct Status(pub usize);
-impl Status {
-    pub const SUCCESS: Self = Status(0);
+use crate::uefi::header::HeaderTable;
+#[allow(unused)]
+pub struct SystemTable{
+    hdr: HeaderTable
 }

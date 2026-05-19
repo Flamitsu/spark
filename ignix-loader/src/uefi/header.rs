@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Ignix.  If not, see <https://www.gnu.org/licenses/>.
  */
-#[repr(transparent)]
-pub struct Status(pub usize);
-impl Status {
-    pub const SUCCESS: Self = Status(0);
+#[allow(unused)]
+pub struct HeaderTable{
+    signature: u64,
+    revision: u32,
+    header_size: u32,
+    crc32: u32,
+    reserved: u32
 }

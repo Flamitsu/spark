@@ -19,12 +19,11 @@
 #![no_main]
 mod panic_handler;
 mod uefi;
-use uefi::types::Status;
-use uefi::system::table::Table;
+use crate::uefi::{Status, SystemTable};
 #[unsafe(no_mangle)]
 extern "efiapi" fn efi_main(
     _image_handle: *mut core::ffi::c_void,
-    _system_table: *mut Table,
+    _system_table: *mut SystemTable,
 ) -> Status {
     Status::SUCCESS
 }
